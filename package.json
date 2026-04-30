@@ -12,6 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.2.1"
+    "@types/react": "^19.2.14",
+    "astro": "^6.2.1",
+    "react": "^19.2.5"
   }
 }
