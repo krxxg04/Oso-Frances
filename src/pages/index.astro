@@ -1,5 +1,6 @@
 ---
 import { useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { calcularValorFuturo, calcularValorPresente, calcularCuotaFija, generarCronograma, calcularVAN, calcularTIR } from '../utils/finance';
 
 const [formData, setFormData] = useState({
@@ -16,7 +17,7 @@ const [formData, setFormData] = useState({
 const [cronograma, setCronograma] = useState([]);
 const [indicadores, setIndicadores] = useState({ van: 0, tir: 0 });
 
-function handleInputChange(event) {
+function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
   const { name, value } = event.target;
   setFormData({ ...formData, [name]: parseFloat(value) || value });
 }
@@ -26,7 +27,7 @@ function calcular() {
   const capital = precioVehiculo - (precioVehiculo * (cuotaInicial / 100));
   const cronogramaCalculado = generarCronograma(capital, tasaNominal, frecuenciaCapitalizacion, plazo, periodosGracia, tipoGracia);
 
-  const flujos = cronogramaCalculado.map((pago) => -pago.cuota);
+  const flujos = cronogramaCalculado.map((pago: any) => -pago.cuota);
   flujos[0] += precioVehiculo * (cuotaInicial / 100);
 
   const van = calcularVAN(tasaNominal / frecuenciaCapitalizacion, flujos);
@@ -48,40 +49,40 @@ function calcular() {
       <form class="bg-white p-6 rounded shadow-md space-y-4">
         <div>
           <label class="block text-sm font-medium">Nombre del Cliente</label>
-          <input type="text" name="nombre" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="text" name="nombre" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Precio del Vehículo</label>
-          <input type="number" name="precioVehiculo" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="number" name="precioVehiculo" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Porcentaje de Cuota Inicial</label>
-          <input type="number" name="cuotaInicial" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="number" name="cuotaInicial" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Plazo (meses)</label>
-          <input type="number" name="plazo" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="number" name="plazo" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Tasa Nominal (TN)</label>
-          <input type="number" name="tasaNominal" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="number" name="tasaNominal" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Frecuencia de Capitalización (m)</label>
-          <input type="number" name="frecuenciaCapitalizacion" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="number" name="frecuenciaCapitalizacion" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Periodos de Gracia</label>
-          <input type="number" name="periodosGracia" class="w-full border rounded p-2" onInput={handleInputChange} />
+          <input type="number" name="periodosGracia" class="w-full border rounded p-2" oninput={handleInputChange} />
         </div>
         <div>
           <label class="block text-sm font-medium">Tipo de Gracia</label>
-          <select name="tipoGracia" class="w-full border rounded p-2" onInput={handleInputChange}>
+          <select name="tipoGracia" class="w-full border rounded p-2" oninput={handleInputChange}>
             <option value="total">Total</option>
             <option value="parcial">Parcial</option>
           </select>
         </div>
-        <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded" onClick={calcular}>Calcular</button>
+        <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded" onclick={calcular}>Calcular</button>
       </form>
 
       <div class="mt-6">
@@ -97,7 +98,7 @@ function calcular() {
             </tr>
           </thead>
           <tbody>
-            {cronograma.map((pago) => (
+            {cronograma.map((pago: any) => (
               <tr>
                 <td class="border border-gray-300 px-4 py-2">{pago.mes}</td>
                 <td class="border border-gray-300 px-4 py-2">{pago.cuota.toFixed(2)}</td>
