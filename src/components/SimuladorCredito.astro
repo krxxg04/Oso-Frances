@@ -1,0 +1,130 @@
+---
+import { generarCronograma, calcularVAN, calcularTIR } from '../utils/finance';
+
+let formData = {
+  nombre: '',
+  precioVehiculo: 0,
+  cuotaInicial: 0,
+  plazo: 0,
+  tasaNominal: 0,
+  frecuenciaCapitalizacion: 0,
+  periodosGracia: 0,
+  tipoGracia: 'total',
+};
+
+let cronograma = [];
+let indicadores = { van: 0, tir: 0 };
+
+function handleInputChange(event) {
+  const { name, value } = event.target;
+  formData = {
+    ...formData,
+    [name]: name === 'tipoGracia' ? value : parseFloat(value) || value,
+  };
+}
+
+function calcular() {
+  const {
+    precioVehiculo,
+    cuotaInicial,
+    plazo,
+    tasaNominal,
+    frecuenciaCapitalizacion,
+    periodosGracia,
+    tipoGracia,
+  } = formData;
+
+  const capital = precioVehiculo - precioVehiculo * (cuotaInicial / 100);
+  cronograma = generarCronograma(
+    capital,
+    tasaNominal,
+    frecuenciaCapitalizacion,
+    plazo,
+    periodosGracia,
+    tipoGracia
+  );
+
+  const flujos = cronograma.map((pago) => -pago.cuota);
+  flujos[0] += precioVehiculo * (cuotaInicial / 100);
+
+  indicadores.van = calcularVAN(tasaNominal / frecuenciaCapitalizacion, flujos);
+  indicadores.tir = calcularTIR(flujos);
+}
+---
+
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold text-center text-blue-600">
+    Simulador de Crédito Vehicular
+  </h1>
+
+  <div class="bg-white p-6 rounded shadow-md space-y-4">
+    {[{ label: 'Nombre del Cliente', name: 'nombre', type: 'text' },
+      { label: 'Precio del Vehículo', name: 'precioVehiculo', type: 'number' },
+      { label: 'Porcentaje de Cuota Inicial (%)', name: 'cuotaInicial', type: 'number' },
+      { label: 'Plazo (meses)', name: 'plazo', type: 'number' },
+      { label: 'Tasa Nominal (TN)', name: 'tasaNominal', type: 'number' },
+      { label: 'Frecuencia de Capitalización (m)', name: 'frecuenciaCapitalizacion', type: 'number' },
+      { label: 'Periodos de Gracia', name: 'periodosGracia', type: 'number' }].map((input) => (
+      <div>
+        <label class="block text-sm font-medium">{input.label}</label>
+        <input
+          type={input.type}
+          name={input.name}
+          class="w-full border rounded p-2"
+          oninput={handleInputChange}
+        />
+      </div>
+    ))}
+
+    <div>
+      <label class="block text-sm font-medium">Tipo de Gracia</label>
+      <select
+        name="tipoGracia"
+        class="w-full border rounded p-2"
+        oninput={handleInputChange}
+      >
+        <option value="total">Total</option>
+        <option value="parcial">Parcial</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="bg-blue-600 text-white px-4 py-2 rounded"
+      onclick={calcular}
+    >
+      Calcular
+    </button>
+  </div>
+
+  <div class="mt-6">
+    <h2 class="text-xl font-bold text-blue-600">Resultados</h2>
+    <table class="table-auto w-full border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 px-4 py-2">Mes</th>
+          <th class="border border-gray-300 px-4 py-2">Cuota</th>
+          <th class="border border-gray-300 px-4 py-2">Interés</th>
+          <th class="border border-gray-300 px-4 py-2">Amortización</th>
+          <th class="border border-gray-300 px-4 py-2">Saldo Deudor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {cronograma.map((pago) => (
+          <tr>
+            <td class="border border-gray-300 px-4 py-2">{pago.mes}</td>
+            <td class="border border-gray-300 px-4 py-2">{pago.cuota.toFixed(2)}</td>
+            <td class="border border-gray-300 px-4 py-2">{pago.interes.toFixed(2)}</td>
+            <td class="border border-gray-300 px-4 py-2">{pago.amortizacion.toFixed(2)}</td>
+            <td class="border border-gray-300 px-4 py-2">{pago.saldoDeudor.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <div class="mt-4">
+      <p><strong>VAN:</strong> {indicadores.van.toFixed(2)}</p>
+      <p><strong>TIR:</strong> {(indicadores.tir * 100).toFixed(2)}%</p>
+    </div>
+  </div>
+</div>
