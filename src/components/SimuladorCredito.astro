@@ -1,7 +1,26 @@
 ---
 import { generarCronograma, calcularVAN, calcularTIR } from '../utils/finance';
 
-let formData = {
+interface FormData {
+  nombre: string;
+  precioVehiculo: number;
+  cuotaInicial: number;
+  plazo: number;
+  tasaNominal: number;
+  frecuenciaCapitalizacion: number;
+  periodosGracia: number;
+  tipoGracia: 'total' | 'parcial';
+}
+
+interface Pago {
+  mes: number;
+  cuota: number;
+  interes: number;
+  amortizacion: number;
+  saldoDeudor: number;
+}
+
+let formData: FormData = {
   nombre: '',
   precioVehiculo: 0,
   cuotaInicial: 0,
@@ -12,14 +31,15 @@ let formData = {
   tipoGracia: 'total',
 };
 
-let cronograma = [];
+let cronograma: Pago[] = [];
 let indicadores = { van: 0, tir: 0 };
 
-function handleInputChange(event) {
-  const { name, value } = event.target;
+function handleInputChange(event: Event) {
+  const target = event.target as HTMLInputElement | HTMLSelectElement;
+  const { name, value } = target;
   formData = {
     ...formData,
-    [name]: name === 'tipoGracia' ? value : parseFloat(value) || value,
+    [name]: name === 'tipoGracia' ? (value as 'total' | 'parcial') : parseFloat(value) || value,
   };
 }
 
