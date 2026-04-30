@@ -1,75 +1,4 @@
 ---
-import { generarCronograma, calcularVAN, calcularTIR } from '../utils/finance';
-
-interface FormData {
-  nombre: string;
-  precioVehiculo: number;
-  cuotaInicial: number;
-  plazo: number;
-  tasaNominal: number;
-  frecuenciaCapitalizacion: number;
-  periodosGracia: number;
-  tipoGracia: 'total' | 'parcial';
-}
-
-interface Pago {
-  mes: number;
-  cuota: number;
-  interes: number;
-  amortizacion: number;
-  saldoDeudor: number;
-}
-
-let formData: FormData = {
-  nombre: '',
-  precioVehiculo: 0,
-  cuotaInicial: 0,
-  plazo: 0,
-  tasaNominal: 0,
-  frecuenciaCapitalizacion: 0,
-  periodosGracia: 0,
-  tipoGracia: 'total',
-};
-
-let cronograma: Pago[] = [];
-let indicadores = { van: 0, tir: 0 };
-
-function handleInputChange(event: Event) {
-  const target = event.target as HTMLInputElement | HTMLSelectElement;
-  const { name, value } = target;
-  formData = {
-    ...formData,
-    [name]: name === 'tipoGracia' ? (value as 'total' | 'parcial') : parseFloat(value) || value,
-  };
-}
-
-function calcular() {
-  const {
-    precioVehiculo,
-    cuotaInicial,
-    plazo,
-    tasaNominal,
-    frecuenciaCapitalizacion,
-    periodosGracia,
-    tipoGracia,
-  } = formData;
-
-  const capital = precioVehiculo - precioVehiculo * (cuotaInicial / 100);
-  cronograma = generarCronograma(
-    capital,
-    tasaNominal,
-    frecuenciaCapitalizacion,
-    plazo,
-    periodosGracia,
-    tipoGracia
-  );
-
-  const flujos = cronograma.map((pago) => -pago.cuota);
-  flujos[0] += precioVehiculo * (cuotaInicial / 100);
-
-  indicadores.van = calcularVAN(tasaNominal / frecuenciaCapitalizacion, flujos);
-  indicadores.tir = calcularTIR(flujos);
-}
 ---
 
 <div class="container mx-auto p-4">
@@ -77,45 +6,103 @@ function calcular() {
     Simulador de Crédito Vehicular
   </h1>
 
-  <div class="bg-white p-6 rounded shadow-md space-y-4">
-    {[{ label: 'Nombre del Cliente', name: 'nombre', type: 'text' },
-      { label: 'Precio del Vehículo', name: 'precioVehiculo', type: 'number' },
-      { label: 'Porcentaje de Cuota Inicial (%)', name: 'cuotaInicial', type: 'number' },
-      { label: 'Plazo (meses)', name: 'plazo', type: 'number' },
-      { label: 'Tasa Nominal (TN)', name: 'tasaNominal', type: 'number' },
-      { label: 'Frecuencia de Capitalización (m)', name: 'frecuenciaCapitalizacion', type: 'number' },
-      { label: 'Periodos de Gracia', name: 'periodosGracia', type: 'number' }].map((input) => (
-      <div>
-        <label class="block text-sm font-medium">{input.label}</label>
-        <input
-          type={input.type}
-          name={input.name}
-          class="w-full border rounded p-2"
-          oninput={handleInputChange}
-        />
-      </div>
-    ))}
+  <form id="simulador-form" class="bg-white p-6 rounded shadow-md space-y-4">
+    <div>
+      <label for="nombre" class="block text-sm font-medium">Nombre del Cliente</label>
+      <input id="nombre" name="nombre" type="text" class="w-full border rounded p-2" />
+    </div>
 
     <div>
-      <label class="block text-sm font-medium">Tipo de Gracia</label>
-      <select
-        name="tipoGracia"
+      <label for="precioVehiculo" class="block text-sm font-medium">Precio del Vehículo</label>
+      <input
+        id="precioVehiculo"
+        name="precioVehiculo"
+        type="number"
+        min="0"
+        step="0.01"
+        required
         class="w-full border rounded p-2"
-        oninput={handleInputChange}
-      >
+      />
+    </div>
+
+    <div>
+      <label for="cuotaInicial" class="block text-sm font-medium">Porcentaje de Cuota Inicial (%)</label>
+      <input
+        id="cuotaInicial"
+        name="cuotaInicial"
+        type="number"
+        min="0"
+        max="100"
+        step="0.01"
+        required
+        class="w-full border rounded p-2"
+      />
+    </div>
+
+    <div>
+      <label for="plazo" class="block text-sm font-medium">Plazo (meses)</label>
+      <input
+        id="plazo"
+        name="plazo"
+        type="number"
+        min="1"
+        step="1"
+        required
+        class="w-full border rounded p-2"
+      />
+    </div>
+
+    <div>
+      <label for="tasaNominal" class="block text-sm font-medium">Tasa Nominal (TN)</label>
+      <input
+        id="tasaNominal"
+        name="tasaNominal"
+        type="number"
+        min="0"
+        step="0.0001"
+        required
+        class="w-full border rounded p-2"
+      />
+    </div>
+
+    <div>
+      <label for="frecuenciaCapitalizacion" class="block text-sm font-medium">Frecuencia de Capitalización (m)</label>
+      <input
+        id="frecuenciaCapitalizacion"
+        name="frecuenciaCapitalizacion"
+        type="number"
+        min="1"
+        step="1"
+        required
+        class="w-full border rounded p-2"
+      />
+    </div>
+
+    <div>
+      <label for="periodosGracia" class="block text-sm font-medium">Periodos de Gracia</label>
+      <input
+        id="periodosGracia"
+        name="periodosGracia"
+        type="number"
+        min="0"
+        step="1"
+        required
+        class="w-full border rounded p-2"
+      />
+    </div>
+
+    <div>
+      <label for="tipoGracia" class="block text-sm font-medium">Tipo de Gracia</label>
+      <select id="tipoGracia" name="tipoGracia" class="w-full border rounded p-2">
         <option value="total">Total</option>
         <option value="parcial">Parcial</option>
       </select>
     </div>
 
-    <button
-      type="button"
-      class="bg-blue-600 text-white px-4 py-2 rounded"
-      onclick={calcular}
-    >
+    <button type="submit" id="btn-calcular" class="bg-blue-600 text-white px-4 py-2 rounded">
       Calcular
     </button>
-  </div>
+  </form>
 
   <div class="mt-6">
     <h2 class="text-xl font-bold text-blue-600">Resultados</h2>
@@ -129,22 +116,100 @@ function calcular() {
           <th class="border border-gray-300 px-4 py-2">Saldo Deudor</th>
         </tr>
       </thead>
-      <tbody>
-        {cronograma.map((pago) => (
-          <tr>
-            <td class="border border-gray-300 px-4 py-2">{pago.mes}</td>
-            <td class="border border-gray-300 px-4 py-2">{pago.cuota.toFixed(2)}</td>
-            <td class="border border-gray-300 px-4 py-2">{pago.interes.toFixed(2)}</td>
-            <td class="border border-gray-300 px-4 py-2">{pago.amortizacion.toFixed(2)}</td>
-            <td class="border border-gray-300 px-4 py-2">{pago.saldoDeudor.toFixed(2)}</td>
-          </tr>
-        ))}
-      </tbody>
+      <tbody id="cronograma-body"></tbody>
     </table>
 
     <div class="mt-4">
-      <p><strong>VAN:</strong> {indicadores.van.toFixed(2)}</p>
-      <p><strong>TIR:</strong> {(indicadores.tir * 100).toFixed(2)}%</p>
+      <p><strong>VAN:</strong> <span id="valor-van">0.00</span></p>
+      <p><strong>TIR:</strong> <span id="valor-tir">0.00%</span></p>
     </div>
   </div>
 </div>
+
+<script lang="ts">
+  import { calcularTIR, calcularVAN, generarCronograma, type Pago } from '../utils/finance';
+
+  type TipoGracia = 'total' | 'parcial';
+
+  const getEl = <T extends HTMLElement>(id: string): T => {
+    const element = document.getElementById(id);
+    if (!element) throw new Error(`No se encontró el elemento #${id}`);
+    return element as T;
+  };
+
+  const form = getEl<HTMLFormElement>('simulador-form');
+
+  const precioVehiculoEl = getEl<HTMLInputElement>('precioVehiculo');
+  const cuotaInicialEl = getEl<HTMLInputElement>('cuotaInicial');
+  const plazoEl = getEl<HTMLInputElement>('plazo');
+  const tasaNominalEl = getEl<HTMLInputElement>('tasaNominal');
+  const frecuenciaCapitalizacionEl = getEl<HTMLInputElement>('frecuenciaCapitalizacion');
+  const periodosGraciaEl = getEl<HTMLInputElement>('periodosGracia');
+  const tipoGraciaEl = getEl<HTMLSelectElement>('tipoGracia');
+
+  const cronogramaBodyEl = getEl<HTMLTableSectionElement>('cronograma-body');
+  const vanEl = getEl<HTMLSpanElement>('valor-van');
+  const tirEl = getEl<HTMLSpanElement>('valor-tir');
+
+  const toNumber = (input: HTMLInputElement): number => {
+    const value = Number(input.value);
+    return Number.isFinite(value) ? value : 0;
+  };
+
+  const format = (n: number): string => n.toFixed(2);
+
+  const renderCronograma = (cronograma: Pago[]) => {
+    cronogramaBodyEl.innerHTML = cronograma
+      .map(
+        (pago) => `
+          <tr>
+            <td class="border border-gray-300 px-4 py-2">${pago.mes}</td>
+            <td class="border border-gray-300 px-4 py-2">${format(pago.cuota)}</td>
+            <td class="border border-gray-300 px-4 py-2">${format(pago.interes)}</td>
+            <td class="border border-gray-300 px-4 py-2">${format(pago.amortizacion)}</td>
+            <td class="border border-gray-300 px-4 py-2">${format(pago.saldoDeudor)}</td>
+          </tr>
+        `
+      )
+      .join('');
+  };
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const precioVehiculo = toNumber(precioVehiculoEl);
+    const cuotaInicial = toNumber(cuotaInicialEl);
+    const plazo = toNumber(plazoEl);
+    const tasaNominal = toNumber(tasaNominalEl);
+    const frecuenciaCapitalizacion = toNumber(frecuenciaCapitalizacionEl);
+    const periodosGracia = toNumber(periodosGraciaEl);
+    const tipoGracia = tipoGraciaEl.value as TipoGracia;
+
+    if (frecuenciaCapitalizacion <= 0) return;
+
+    const capital = precioVehiculo - precioVehiculo * (cuotaInicial / 100);
+    const cronograma = generarCronograma(
+      capital,
+      tasaNominal,
+      frecuenciaCapitalizacion,
+      plazo,
+      periodosGracia,
+      tipoGracia
+    );
+
+    renderCronograma(cronograma);
+
+    const flujos = cronograma.map((pago) => -pago.cuota);
+    if (flujos.length > 0) {
+      flujos[0] += precioVehiculo * (cuotaInicial / 100);
+    }
+
+    const tasaPeriodo = tasaNominal / frecuenciaCapitalizacion;
+    const van = calcularVAN(tasaPeriodo, flujos);
+    const tir = calcularTIR(flujos);
+
+    vanEl.textContent = format(van);
+    tirEl.textContent = `${(tir * 100).toFixed(2)}%`;
+  });
+</script>

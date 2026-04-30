@@ -1,5 +1,13 @@
 // Archivo: finance.ts
 
+export interface Pago {
+    mes: number;
+    cuota: number;
+    interes: number;
+    amortizacion: number;
+    saldoDeudor: number;
+}
+
 // Cálculo del Valor Futuro
 export function calcularValorFuturo(C: number, TN: number, m: number, n: number): number {
     return C * Math.pow((1 + TN / m), n);
@@ -17,10 +25,17 @@ export function calcularCuotaFija(C: number, TN: number, m: number, n: number): 
 }
 
 // Generar cronograma de pagos
-export function generarCronograma(C: number, TN: number, m: number, n: number, periodosGracia: number, tipoGracia: 'total' | 'parcial') {
+export function generarCronograma(
+    C: number,
+    TN: number,
+    m: number,
+    n: number,
+    periodosGracia: number,
+    tipoGracia: 'total' | 'parcial'
+): Pago[] {
     const i = TN / m; // Tasa de interés por periodo
     const cuota = calcularCuotaFija(C, TN, m, n);
-    const cronograma = [];
+    const cronograma: Pago[] = [];
 
     let saldoDeudor = C;
 
