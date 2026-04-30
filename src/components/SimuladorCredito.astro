@@ -129,33 +129,48 @@
 <script>
   import { calcularTIR, calcularVAN, generarCronograma } from '../utils/finance';
 
+  /** @param {string} id */
   const getEl = (id) => {
     const element = document.getElementById(id);
     if (!element) throw new Error(`No se encontró el elemento #${id}`);
     return element;
   };
 
-  const form = /** @type {HTMLFormElement} */ (getEl('simulador-form'));
+  /** @type {HTMLFormElement} */
+  const form = getEl('simulador-form');
 
-  const precioVehiculoEl = /** @type {HTMLInputElement} */ (getEl('precioVehiculo'));
-  const cuotaInicialEl = /** @type {HTMLInputElement} */ (getEl('cuotaInicial'));
-  const plazoEl = /** @type {HTMLInputElement} */ (getEl('plazo'));
-  const tasaNominalEl = /** @type {HTMLInputElement} */ (getEl('tasaNominal'));
-  const frecuenciaCapitalizacionEl = /** @type {HTMLInputElement} */ (getEl('frecuenciaCapitalizacion'));
-  const periodosGraciaEl = /** @type {HTMLInputElement} */ (getEl('periodosGracia'));
-  const tipoGraciaEl = /** @type {HTMLSelectElement} */ (getEl('tipoGracia'));
+  /** @type {HTMLInputElement} */
+  const precioVehiculoEl = getEl('precioVehiculo');
+  /** @type {HTMLInputElement} */
+  const cuotaInicialEl = getEl('cuotaInicial');
+  /** @type {HTMLInputElement} */
+  const plazoEl = getEl('plazo');
+  /** @type {HTMLInputElement} */
+  const tasaNominalEl = getEl('tasaNominal');
+  /** @type {HTMLInputElement} */
+  const frecuenciaCapitalizacionEl = getEl('frecuenciaCapitalizacion');
+  /** @type {HTMLInputElement} */
+  const periodosGraciaEl = getEl('periodosGracia');
+  /** @type {HTMLSelectElement} */
+  const tipoGraciaEl = getEl('tipoGracia');
 
-  const cronogramaBodyEl = /** @type {HTMLTableSectionElement} */ (getEl('cronograma-body'));
-  const vanEl = /** @type {HTMLSpanElement} */ (getEl('valor-van'));
-  const tirEl = /** @type {HTMLSpanElement} */ (getEl('valor-tir'));
+  /** @type {HTMLTableSectionElement} */
+  const cronogramaBodyEl = getEl('cronograma-body');
+  /** @type {HTMLSpanElement} */
+  const vanEl = getEl('valor-van');
+  /** @type {HTMLSpanElement} */
+  const tirEl = getEl('valor-tir');
 
+  /** @param {HTMLInputElement} input */
   const toNumber = (input) => {
     const value = Number(input.value);
     return Number.isFinite(value) ? value : 0;
   };
 
+  /** @param {number} n */
   const format = (n) => n.toFixed(2);
 
+  /** @param {import('../utils/finance').Pago[]} cronograma */
   const renderCronograma = (cronograma) => {
     cronogramaBodyEl.innerHTML = cronograma
       .map(
