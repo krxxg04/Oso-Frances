@@ -60,7 +60,7 @@ export async function getOrCreateCliente(nombre: string): Promise<Cliente> {
   const { nombre: normalized, nombreKey } = normalizeNombre(nombre);
   if (!normalized) throw new Error('Nombre de cliente inválido');
 
-  const existing = await db.clientes.get({ nombreKey });
+  const existing = await db.clientes.where('nombreKey').equals(nombreKey).first();
   if (existing) return existing;
 
   const creadoEn = new Date().toISOString();
