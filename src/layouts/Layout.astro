@@ -3,25 +3,32 @@ import '../styles/global.css';
 const { title } = Astro.props;
 ---
 	<!doctype html>
-	<html lang="en">
+	<html lang="es">
 		<head>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width" />
 			<link rel="icon" type="image/png" href="/Whiteosito.png" />
 			<link rel="apple-touch-icon" href="/Whiteosito.png" />
 			<meta name="generator" content={Astro.generator} />
-			<title>{title ? `${title} · Oso Frances` : 'Oso Frances'}</title>
+			<title>{title ? `${title} · El Oso Francés` : 'El Oso Francés'}</title>
 		</head>
-		<body class="min-h-screen bg-blue-50 text-slate-900 font-sans antialiased">
-			<slot />
+		<body class="app-body">
+			<div class="app-shell">
+				<header class="navbar">
+					<div class="nav-inner">
+						<div class="nav-brand">
+							<img src="/Whiteosito.png" alt="El Oso Francés" class="nav-logo" />
+							<div>
+								<p class="nav-title">El Oso Francés</p>
+								<p class="nav-subtitle">Crédito vehicular premium</p>
+							</div>
+						</div>
+						<span class="nav-pill">Banca privada</span>
+					</div>
+				</header>
+				<div class="app-content">
+					<slot />
+				</div>
+			</div>
 		</body>
 	</html>
-
-	<style>
-		html,
-		body {
-			margin: 0;
-			width: 100%;
-			height: 100%;
-		}
-	</style>

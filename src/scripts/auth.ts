@@ -23,7 +23,10 @@ export function ensureDefaultUsers(): void {
   const existing = safeJsonParse<StoredUser[]>(localStorage.getItem(USERS_KEY));
   if (Array.isArray(existing) && existing.length > 0) return;
 
-  const seed: StoredUser[] = [{ username: 'admin', password: 'admin' }];
+  const seed: StoredUser[] = [
+    { username: 'admin', password: 'admin' },
+    { username: 'user', password: 'user' },
+  ];
   localStorage.setItem(USERS_KEY, JSON.stringify(seed));
 }
 
