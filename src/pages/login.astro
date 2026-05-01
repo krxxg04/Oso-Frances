@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Login">
+	<main class="mx-auto w-full max-w-md px-4 py-10">
+		<div class="rounded-xl border border-blue-100 bg-white p-6">
+			<header class="flex items-center gap-3">
+				<img
+					src="/Whiteosito.png"
+					alt="Oso Francés"
+					class="h-10 w-10 rounded-lg border border-blue-100 bg-white"
+					loading="eager"
+				/>
+				<div class="leading-tight">
+					<h1 class="text-lg font-semibold tracking-tight text-slate-900">Acceso</h1>
+					<p class="mt-0.5 text-xs text-slate-500">Valida contra credenciales en localStorage</p>
+				</div>
+			</header>
+
+			<form id="login-form" class="mt-6 space-y-4">
+				<div>
+					<label for="username" class="block text-xs font-medium text-slate-700">Usuario</label>
+					<input
+						id="username"
+						name="username"
+						type="text"
+						required
+						autocomplete="username"
+						class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+					/>
+				</div>
+
+				<div>
+					<label for="password" class="block text-xs font-medium text-slate-700">Contraseña</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						required
+						autocomplete="current-password"
+						class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+					/>
+				</div>
+
+				<p id="login-error" class="hidden rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-slate-700"></p>
+
+				<button
+					type="submit"
+					class="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+				>
+					Ingresar
+				</button>
+
+				<p class="text-xs text-slate-500">Usuario demo: <span class="font-medium">admin</span> · Clave demo: <span class="font-medium">admin</span></p>
+			</form>
+		</div>
+	</main>
+</Layout>
+
+<script>
+	import initLogin from '../scripts/login';
+	initLogin();
+</script>
