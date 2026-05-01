@@ -40,6 +40,10 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
+.app-body {
+	font-family: var(--font-sans);
+}
+
 img {
 	max-width: 100%;
 	display: block;
@@ -212,6 +216,12 @@ body::-webkit-scrollbar-thumb {
 	transition: var(--transition);
 }
 
+.card-footer {
+	margin-top: 18px;
+	display: flex;
+	justify-content: flex-end;
+}
+
 .card-header {
 	display: flex;
 	align-items: center;
@@ -301,6 +311,14 @@ body::-webkit-scrollbar-thumb {
 	overflow: hidden;
 }
 
+.table-scroll {
+	overflow-x: auto;
+}
+
+.results-table-card {
+	margin-top: 16px;
+}
+
 .results-table {
 	width: 100%;
 	border-collapse: collapse;
@@ -336,6 +354,10 @@ body::-webkit-scrollbar-thumb {
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.results-stats {
+	margin-top: 18px;
+}
+
 .stat-card {
 	background: rgba(255, 255, 255, 0.92);
 	border-radius: var(--radius-lg);
@@ -369,6 +391,11 @@ body::-webkit-scrollbar-thumb {
 	box-shadow: var(--shadow-soft);
 	-webkit-backdrop-filter: blur(18px);
 	backdrop-filter: blur(18px);
+}
+
+.simulador {
+	display: grid;
+	gap: 28px;
 }
 
 .login-logo {
