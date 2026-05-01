@@ -1,158 +1,173 @@
 ---
 ---
 
-<div>
-  <div class="flex items-end justify-between">
-    <h2 class="text-sm font-semibold tracking-tight text-slate-900">Simulador de crédito vehicular</h2>
-    <p class="text-xs text-slate-500">Cálculo y cronograma</p>
-  </div>
-
-  <form id="simulador-form" class="mt-3 space-y-4 rounded-xl border border-blue-100 bg-white p-6">
+<div class="simulador">
+  <header class="section-header">
     <div>
-      <label for="nombre" class="block text-xs font-medium text-slate-700">Nombre del cliente</label>
-      <input
-        id="nombre"
-        name="nombre"
-        type="text"
-        required
-        class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
+      <p class="eyebrow">Simulador</p>
+      <h2 class="section-title">Crédito vehicular</h2>
+      <p class="section-subtitle">Método Francés · Cronograma y métricas</p>
     </div>
+    <span class="chip">Compra inteligente</span>
+  </header>
 
-    <div>
-			<label for="precioVehiculo" class="block text-xs font-medium text-slate-700">Precio del vehículo</label>
-      <input
-        id="precioVehiculo"
-        name="precioVehiculo"
-        type="number"
-        min="0"
-        step="0.01"
-        required
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
-    </div>
+  <form id="simulador-form" class="form-stack">
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Datos del cliente</h3>
+          <p class="card-subtitle">Identificación básica</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="nombre" class="field-label">Nombre del cliente</label>
+          <input id="nombre" name="nombre" type="text" required class="ios-input" />
+        </div>
+      </div>
+    </section>
 
-    <div>
-			<label for="cuotaInicial" class="block text-xs font-medium text-slate-700">Porcentaje de cuota inicial (%)</label>
-      <input
-        id="cuotaInicial"
-        name="cuotaInicial"
-        type="number"
-        min="0"
-        max="100"
-        step="0.01"
-        required
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
-    </div>
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Condiciones del crédito</h3>
+          <p class="card-subtitle">Monto, tasa y plazo</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="precioVehiculo" class="field-label">Precio del vehículo</label>
+          <input
+            id="precioVehiculo"
+            name="precioVehiculo"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            class="ios-input"
+          />
+        </div>
 
-    <div>
-			<label for="plazo" class="block text-xs font-medium text-slate-700">Plazo (meses)</label>
-      <input
-        id="plazo"
-        name="plazo"
-        type="number"
-        min="1"
-        step="1"
-        required
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
-    </div>
+        <div class="field">
+          <label for="cuotaInicial" class="field-label">Cuota inicial (%)</label>
+          <input
+            id="cuotaInicial"
+            name="cuotaInicial"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            required
+            class="ios-input"
+          />
+        </div>
 
-    <div>
-			<label for="tasaNominal" class="block text-xs font-medium text-slate-700">Tasa nominal (TN)</label>
-      <input
-        id="tasaNominal"
-        name="tasaNominal"
-        type="number"
-        min="0"
-        step="0.0001"
-        required
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
-    </div>
+        <div class="field">
+          <label for="plazo" class="field-label">Plazo (meses)</label>
+          <input id="plazo" name="plazo" type="number" min="1" step="1" required class="ios-input" />
+        </div>
 
-    <div>
-			<label for="frecuenciaCapitalizacion" class="block text-xs font-medium text-slate-700">Frecuencia de capitalización (m)</label>
-      <input
-        id="frecuenciaCapitalizacion"
-        name="frecuenciaCapitalizacion"
-        type="number"
-        min="1"
-        step="1"
-        required
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
-    </div>
+        <div class="field">
+          <label for="tasaNominal" class="field-label">Tasa nominal (TN)</label>
+          <input
+            id="tasaNominal"
+            name="tasaNominal"
+            type="number"
+            min="0"
+            step="0.0001"
+            required
+            class="ios-input"
+          />
+        </div>
 
-    <div>
-			<label for="periodosGracia" class="block text-xs font-medium text-slate-700">Periodos de gracia</label>
-      <input
-        id="periodosGracia"
-        name="periodosGracia"
-        type="number"
-        min="0"
-        step="1"
-        required
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      />
-    </div>
+        <div class="field">
+          <label for="frecuenciaCapitalizacion" class="field-label">Frecuencia de capitalización (m)</label>
+          <input
+            id="frecuenciaCapitalizacion"
+            name="frecuenciaCapitalizacion"
+            type="number"
+            min="1"
+            step="1"
+            required
+            class="ios-input"
+          />
+        </div>
+      </div>
+    </section>
 
-    <div>
-      <label for="tipoGracia" class="block text-xs font-medium text-slate-700">Tipo de gracia</label>
-      <select
-        id="tipoGracia"
-        name="tipoGracia"
-				class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-      >
-        <option value="total">Total</option>
-        <option value="parcial">Parcial</option>
-      </select>
-    </div>
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Períodos de gracia</h3>
+          <p class="card-subtitle">Opciones de diferimiento</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="periodosGracia" class="field-label">Períodos de gracia</label>
+          <input
+            id="periodosGracia"
+            name="periodosGracia"
+            type="number"
+            min="0"
+            step="1"
+            required
+            class="ios-input"
+          />
+        </div>
 
-    <button
-      type="submit"
-      id="btn-calcular"
-      class="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
-    >
-      Calcular
-    </button>
+        <div class="field">
+          <label for="tipoGracia" class="field-label">Tipo de gracia</label>
+          <select id="tipoGracia" name="tipoGracia" class="ios-input">
+            <option value="total">Total</option>
+            <option value="parcial">Parcial</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button type="submit" id="btn-calcular" class="btn-primary">Calcular</button>
+      </div>
+    </section>
   </form>
 
-  <div class="mt-7">
-    <div class="flex items-end justify-between">
-      <h3 class="text-sm font-semibold tracking-tight text-slate-900">Resultados</h3>
-      <p class="text-xs text-slate-500">Cronograma</p>
-    </div>
+  <section class="results">
+    <header class="section-header">
+      <div>
+        <p class="eyebrow">Resultados</p>
+        <h3 class="section-title">Cronograma</h3>
+        <p class="section-subtitle">Detalle de cuotas y saldos</p>
+      </div>
+      <span class="chip">VAN &amp; TIR</span>
+    </header>
 
-    <div class="mt-3 overflow-hidden rounded-xl border border-blue-100 bg-white">
-      <div class="overflow-x-auto">
-        <table class="w-full table-auto border-collapse text-xs">
-          <thead class="bg-blue-50 text-slate-600">
-            <tr class="border-b border-blue-100">
-              <th class="px-4 py-3 text-left font-medium">Mes</th>
-              <th class="px-4 py-3 text-left font-medium">Cuota</th>
-              <th class="px-4 py-3 text-left font-medium">Interés</th>
-              <th class="px-4 py-3 text-left font-medium">Amortización</th>
-              <th class="px-4 py-3 text-left font-medium">Saldo Deudor</th>
+    <div class="card table-card results-table-card">
+      <div class="table-scroll">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Cuota</th>
+              <th>Interés</th>
+              <th>Amortización</th>
+              <th>Saldo Deudor</th>
             </tr>
           </thead>
-          <tbody id="cronograma-body" class="divide-y divide-gray-100"></tbody>
+          <tbody id="cronograma-body"></tbody>
         </table>
       </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-2 gap-3">
-      <div class="rounded-xl border border-blue-100 bg-white p-4">
-        <p class="text-xs text-slate-500">VAN</p>
-        <p class="mt-1 text-sm font-semibold text-slate-900 tabular-nums"><span id="valor-van">0.00</span></p>
+    <div class="stats-grid results-stats">
+      <div class="stat-card">
+        <p class="stat-label">VAN</p>
+        <p class="stat-value"><span id="valor-van">0.00</span></p>
       </div>
-      <div class="rounded-xl border border-blue-100 bg-white p-4">
-        <p class="text-xs text-slate-500">TIR</p>
-        <p class="mt-1 text-sm font-semibold text-slate-900 tabular-nums"><span id="valor-tir">0.00%</span></p>
+      <div class="stat-card">
+        <p class="stat-label">TIR</p>
+        <p class="stat-value"><span id="valor-tir">0.00%</span></p>
       </div>
     </div>
-  </div>
+  </section>
 </div>
 
 <script>
