@@ -1,4 +1,12 @@
-import { calcularTIR, calcularVAN, generarCronograma, type Pago } from '../utils/finance';
+import {
+  calcularTIR,
+  calcularVAN,
+  generarCronograma,
+  tasaEfectivaMensualDesdeTN,
+  type Pago,
+} from '../utils/finance';
+
+import { guardarSimulacion, type SimulacionInput, type SimulacionResult } from '../utils/db';
 
 type TipoGracia = 'total' | 'parcial';
 
@@ -22,11 +30,11 @@ const renderCronograma = (tbody: HTMLTableSectionElement, cronograma: Pago[]) =>
     .map(
       (pago) => `
         <tr>
-          <td class="border border-gray-300 px-4 py-2">${pago.mes}</td>
-          <td class="border border-gray-300 px-4 py-2">${format(pago.cuota)}</td>
-          <td class="border border-gray-300 px-4 py-2">${format(pago.interes)}</td>
-          <td class="border border-gray-300 px-4 py-2">${format(pago.amortizacion)}</td>
-          <td class="border border-gray-300 px-4 py-2">${format(pago.saldoDeudor)}</td>
+          <td class="px-4 py-3 text-left text-slate-700">${pago.mes}</td>
+          <td class="px-4 py-3 text-right tabular-nums text-slate-700">${format(pago.cuota)}</td>
+          <td class="px-4 py-3 text-right tabular-nums text-slate-700">${format(pago.interes)}</td>
+          <td class="px-4 py-3 text-right tabular-nums text-slate-700">${format(pago.amortizacion)}</td>
+          <td class="px-4 py-3 text-right tabular-nums text-slate-700">${format(pago.saldoDeudor)}</td>
         </tr>
       `
     )
@@ -35,6 +43,8 @@ const renderCronograma = (tbody: HTMLTableSectionElement, cronograma: Pago[]) =>
 
 export default function initSimuladorCredito(): void {
   const form = getRequiredEl<HTMLFormElement>('simulador-form');
+
+  const nombreEl = getRequiredEl<HTMLInputElement>('nombre');
 
   const precioVehiculoEl = getRequiredEl<HTMLInputElement>('precioVehiculo');
   const cuotaInicialEl = getRequiredEl<HTMLInputElement>('cuotaInicial');
@@ -48,42 +58,76 @@ export default function initSimuladorCredito(): void {
   const vanEl = getRequiredEl<HTMLSpanElement>('valor-van');
   const tirEl = getRequiredEl<HTMLSpanElement>('valor-tir');
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
 
+    const nombreCliente = nombreEl.value.trim();
     const precioVehiculo = toNumber(precioVehiculoEl);
     const cuotaInicial = toNumber(cuotaInicialEl);
-    const plazo = toNumber(plazoEl);
-    const tasaNominal = toNumber(tasaNominalEl);
-    const frecuenciaCapitalizacion = toNumber(frecuenciaCapitalizacionEl);
-    const periodosGracia = toNumber(periodosGraciaEl);
+    const plazo = Math.max(1, Math.trunc(toNumber(plazoEl)));
+    const tasaNominalRaw = toNumber(tasaNominalEl);
+    const tasaNominal = tasaNominalRaw > 1 ? tasaNominalRaw / 100 : tasaNominalRaw;
+    const frecuenciaCapitalizacion = Math.max(1, Math.trunc(toNumber(frecuenciaCapitalizacionEl)));
+    const periodosGracia = Math.max(0, Math.trunc(toNumber(periodosGraciaEl)));
     const tipoGracia = normalizeTipoGracia(tipoGraciaEl.value);
 
     if (frecuenciaCapitalizacion <= 0) return;
+    if (!nombreCliente) return;
 
     const capital = precioVehiculo - precioVehiculo * (cuotaInicial / 100);
+    const gracia = Math.min(plazo, periodosGracia);
+
     const cronograma = generarCronograma(
       capital,
       tasaNominal,
       frecuenciaCapitalizacion,
       plazo,
-      periodosGracia,
+      gracia,
       tipoGracia
     );
 
     renderCronograma(cronogramaBodyEl, cronograma);
 
-    const flujos = cronograma.map((pago) => -pago.cuota);
-    if (flujos.length > 0) {
-      flujos[0] += precioVehiculo * (cuotaInicial / 100);
-    }
+    // Flujos del préstamo (perspectiva del banco):
+    // t=0: desembolso (negativo), t=1..n: cobros de cuotas (positivos)
+    const flujos = [-capital, ...cronograma.map((pago) => pago.cuota)];
 
-    const tasaPeriodo = tasaNominal / frecuenciaCapitalizacion;
+    const tasaPeriodo = tasaEfectivaMensualDesdeTN(tasaNominal, frecuenciaCapitalizacion);
     const van = calcularVAN(tasaPeriodo, flujos);
     const tir = calcularTIR(flujos);
 
     vanEl.textContent = format(van);
-    tirEl.textContent = `${(tir * 100).toFixed(2)}%`;
+
+    if (Number.isFinite(tir)) {
+      tirEl.textContent = `${(tir * 100).toFixed(4)}%`;
+    } else {
+      tirEl.textContent = '—';
+    }
+
+    // Persistencia (IndexedDB)
+    const input: SimulacionInput = {
+      nombreCliente,
+      precioVehiculo,
+      porcentajeCuotaInicial: cuotaInicial,
+      plazoMeses: plazo,
+      tasaNominalAnual: tasaNominal,
+      capitalizacionPorAnio: frecuenciaCapitalizacion,
+      periodosGracia: gracia,
+      tipoGracia,
+    };
+
+    const result: SimulacionResult = {
+      tasaPeriodo,
+      van,
+      tir,
+      cronograma,
+    };
+
+    try {
+      await guardarSimulacion(input, result);
+    } catch (error) {
+      console.warn('No se pudo guardar la simulación en IndexedDB:', error);
+    }
   });
 }
