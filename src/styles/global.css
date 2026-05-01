@@ -395,6 +395,10 @@ body::-webkit-scrollbar-thumb {
 	color: var(--plomo-1);
 }
 
+.login-eyebrow {
+	text-align: center;
+}
+
 .alert {
 	padding: 10px 12px;
 	border-radius: var(--radius-md);
