@@ -6,13 +6,13 @@
 	--plomo-1: #8e8e93;
 	--plomo-2: #aeaeb2;
 	--plomo-3: #c7c7cc;
-	--accent: #007aff;
+	--accent: #aeaeb2;
 	--radius-xl: 28px;
 	--radius-lg: 22px;
 	--radius-md: 14px;
-	--shadow-soft: 0 30px 70px rgba(0, 0, 0, 0.35);
-	--shadow-card: 0 18px 40px rgba(0, 0, 0, 0.22);
-	--shadow-float: 0 12px 28px rgba(0, 0, 0, 0.2);
+	--shadow-soft: 0 24px 60px #0a0a0a;
+	--shadow-card: 0 18px 40px #0a0a0a;
+	--shadow-float: 0 12px 28px #0a0a0a;
 	--transition: all 0.2s ease;
 	--font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
@@ -34,7 +34,7 @@ body {
 body {
 	font-family: var(--font-sans);
 	background: var(--bg-dark-1);
-	color: var(--bg-light-1);
+	color: var(--bg-light-2);
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
@@ -68,7 +68,7 @@ a:hover {
 }
 
 ::selection {
-	background: rgba(0, 122, 255, 0.2);
+	background: #3a3a3c;
 }
 
 .hidden {
@@ -77,7 +77,7 @@ a:hover {
 
 body {
 	scrollbar-width: thin;
-	scrollbar-color: rgba(199, 199, 204, 0.4) transparent;
+	scrollbar-color: #3a3a3c transparent;
 }
 
 body::-webkit-scrollbar {
@@ -89,7 +89,7 @@ body::-webkit-scrollbar-track {
 }
 
 body::-webkit-scrollbar-thumb {
-	background: rgba(199, 199, 204, 0.4);
+	background: #3a3a3c;
 	border-radius: 999px;
 }
 
@@ -116,10 +116,10 @@ body::-webkit-scrollbar-thumb {
 	position: sticky;
 	top: 0;
 	z-index: 40;
-	background: rgba(28, 28, 30, 0.72);
+	background: #1c1c1e;
 	-webkit-backdrop-filter: blur(20px);
 	backdrop-filter: blur(20px);
-	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+	box-shadow: 0 1px 0 #2c2c2e;
 }
 
 .nav-inner {
@@ -142,7 +142,7 @@ body::-webkit-scrollbar-thumb {
 	width: 40px;
 	height: 40px;
 	border-radius: 16px;
-	background: rgba(255, 255, 255, 0.08);
+	background: #2c2c2e;
 	padding: 6px;
 }
 
@@ -160,11 +160,12 @@ body::-webkit-scrollbar-thumb {
 .nav-pill {
 	padding: 6px 12px;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.08);
-	color: var(--plomo-3);
+	background: #2c2c2e;
+	color: var(--plomo-2);
 	font-size: 0.7rem;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
+	border: 1px solid #3a3a3c;
 }
 
 .section-header {
@@ -185,35 +186,37 @@ body::-webkit-scrollbar-thumb {
 	margin: 6px 0 4px;
 	font-size: 1.5rem;
 	font-weight: 600;
-	color: var(--bg-light-1);
+	color: var(--bg-light-2);
 }
 
 .section-subtitle {
 	margin: 0;
-	color: var(--plomo-1);
+	color: var(--plomo-2);
 	font-size: 0.9rem;
 }
 
 .chip {
 	padding: 6px 12px;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.1);
-	color: var(--plomo-3);
+	background: #2c2c2e;
+	color: var(--plomo-2);
 	font-size: 0.7rem;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	transition: var(--transition);
+	border: 1px solid #3a3a3c;
 }
 
 .card {
-	background: rgba(255, 255, 255, 0.92);
-	color: #0a0a0a;
+	background: #1c1c1e;
+	color: #f2f2f7;
 	border-radius: var(--radius-xl);
 	padding: 24px;
 	box-shadow: var(--shadow-card);
 	-webkit-backdrop-filter: blur(18px);
 	backdrop-filter: blur(18px);
 	transition: var(--transition);
+	border: 1px solid #2c2c2e;
 }
 
 .card-footer {
@@ -234,6 +237,7 @@ body::-webkit-scrollbar-thumb {
 	font-size: 1rem;
 	font-weight: 600;
 	margin: 0;
+	color: #f2f2f7;
 }
 
 .card-subtitle {
@@ -268,12 +272,12 @@ body::-webkit-scrollbar-thumb {
 
 .ios-input {
 	width: 100%;
-	border: 1px solid transparent;
+	border: 1px solid #3a3a3c;
 	border-radius: var(--radius-md);
-	background: var(--bg-light-2);
+	background: #2c2c2e;
 	padding: 12px 14px;
-	color: #0a0a0a;
-	box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.08);
+	color: #f2f2f7;
+	box-shadow: none;
 	transition: var(--transition);
 }
 
@@ -283,32 +287,34 @@ body::-webkit-scrollbar-thumb {
 
 .ios-input:focus {
 	outline: none;
-	background: var(--bg-light-1);
-	box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+	background: #2c2c2e;
+	border-color: #aeaeb2;
+	box-shadow: none;
 }
 
 .btn-primary {
 	width: 100%;
-	border: none;
+	border: 1px solid #3a3a3c;
 	border-radius: var(--radius-md);
 	padding: 12px 16px;
 	font-size: 0.95rem;
 	font-weight: 600;
 	color: #ffffff;
-	background: var(--accent);
-	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
+	background: #2c2c2e;
+	box-shadow: var(--shadow-float);
 	cursor: pointer;
 	transition: var(--transition);
 }
 
 .btn-primary:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+	background: #3a3a3c;
 }
 
 .table-card {
 	padding: 0;
 	overflow: hidden;
+	border: 1px solid #2c2c2e;
 }
 
 .table-scroll {
@@ -323,7 +329,7 @@ body::-webkit-scrollbar-thumb {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 0.85rem;
-	color: #0a0a0a;
+	color: #f2f2f7;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -333,19 +339,19 @@ body::-webkit-scrollbar-thumb {
 	font-weight: 600;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--plomo-1);
-	background: var(--bg-light-2);
+	color: var(--plomo-2);
+	background: #2c2c2e;
 	padding: 12px 16px;
 }
 
 .results-table tbody td {
 	padding: 12px 16px;
-	border-top: 1px solid rgba(10, 10, 10, 0.06);
+	border-top: 1px solid #2c2c2e;
 	transition: var(--transition);
 }
 
 .results-table tbody tr:nth-child(even) {
-	background: var(--bg-light-2);
+	background: #2c2c2e;
 }
 
 .stats-grid {
@@ -359,12 +365,13 @@ body::-webkit-scrollbar-thumb {
 }
 
 .stat-card {
-	background: rgba(255, 255, 255, 0.92);
+	background: #1c1c1e;
 	border-radius: var(--radius-lg);
 	padding: 18px 20px;
 	box-shadow: var(--shadow-float);
 	transition: var(--transition);
-	color: #0a0a0a;
+	color: #f2f2f7;
+	border: 1px solid #2c2c2e;
 }
 
 .stat-label {
@@ -384,13 +391,14 @@ body::-webkit-scrollbar-thumb {
 
 .login-card {
 	width: min(420px, 100%);
-	background: rgba(255, 255, 255, 0.94);
-	color: #0a0a0a;
+	background: #1c1c1e;
+	color: #f2f2f7;
 	border-radius: 32px;
 	padding: 36px;
 	box-shadow: var(--shadow-soft);
 	-webkit-backdrop-filter: blur(18px);
 	backdrop-filter: blur(18px);
+	border: 1px solid #2c2c2e;
 }
 
 .simulador {
@@ -402,10 +410,11 @@ body::-webkit-scrollbar-thumb {
 	width: 72px;
 	height: 72px;
 	margin: 0 auto 20px;
-	border-radius: 22px;
+	border-radius: 999px;
 	padding: 10px;
-	background: var(--bg-light-2);
-	box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.06);
+	background: #2c2c2e;
+	box-shadow: none;
+	border: 1px solid #3a3a3c;
 }
 
 .login-title {
@@ -419,7 +428,7 @@ body::-webkit-scrollbar-thumb {
 	margin: 0 0 24px;
 	text-align: center;
 	font-size: 0.9rem;
-	color: var(--plomo-1);
+	color: var(--plomo-2);
 }
 
 .login-eyebrow {
@@ -429,14 +438,15 @@ body::-webkit-scrollbar-thumb {
 .alert {
 	padding: 10px 12px;
 	border-radius: var(--radius-md);
-	background: rgba(242, 242, 247, 0.9);
-	color: #0a0a0a;
+	background: #2c2c2e;
+	color: #f2f2f7;
 	font-size: 0.85rem;
+	border: 1px solid #3a3a3c;
 }
 
 .helper {
 	font-size: 0.78rem;
-	color: var(--plomo-1);
+	color: var(--plomo-2);
 	text-align: center;
 }
 
