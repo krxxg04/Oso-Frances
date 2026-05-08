@@ -5,10 +5,10 @@
   tasaEfectivaMensualDesdeTN,
   type Pago,
 } from '../utils/finance';
+import { API_BASE_URL } from './api';
 
 type TipoGracia = 'total' | 'parcial';
 
-const API_BASE_URL = 'https://backend-oso-frances.onrender.com';
 
 const getRequiredEl = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);
@@ -132,3 +132,4 @@ export default function initSimuladorCredito(): void {
     }
   });
 }
+

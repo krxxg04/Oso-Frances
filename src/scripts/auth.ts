@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://backend-oso-frances.onrender.com';
+import { API_BASE_URL, NETWORK_ERROR_MESSAGE, diagnoseBackendConnection } from './api';
 
 type ApiErrorPayload = {
   detail?: string;
@@ -43,7 +43,8 @@ async function postAuth(path: string, body: Record<string, unknown>, fallbackErr
 
     return { ok: true };
   } catch {
-    return { ok: false, message: 'No se pudo conectar con el backend.' };
+    const diagnosis = await diagnoseBackendConnection();
+    return { ok: false, message: `${NETWORK_ERROR_MESSAGE} ${diagnosis}` };
   }
 }
 
