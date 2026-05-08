@@ -11,5 +11,5 @@ import SimuladorCredito from '../components/SimuladorCredito.astro';
 
 <script>
   import { requireAuthOrRedirect } from '../scripts/auth';
-  requireAuthOrRedirect();
+  void requireAuthOrRedirect();
 </script>

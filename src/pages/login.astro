@@ -1,47 +1,53 @@
----
+﻿---
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Login">
+<Layout title="Acceso">
 	<main class="page-center">
 		<section class="login-card">
-			<img src="/Whiteosito.png" alt="El Oso Francés" class="login-logo" loading="eager" />
-			<p class="eyebrow login-eyebrow">El Oso Francés</p>
+			<img src="/Whiteosito.png" alt="El Oso Frances" class="login-logo" loading="eager" />
+			<p class="eyebrow login-eyebrow">El Oso Frances</p>
 			<h1 class="login-title">Acceso seguro</h1>
-			<p class="login-subtitle">Valida tu identidad para continuar con el simulador.</p>
+			<p class="login-subtitle">Crea tu cuenta o inicia sesion para continuar con el simulador.</p>
 
 			<form id="login-form" class="form-stack">
+				<h2 class="auth-section-title">Iniciar sesion</h2>
 				<div class="field">
-					<label for="username" class="field-label">Usuario</label>
-					<input
-						id="username"
-						name="username"
-						type="text"
-						required
-						autocomplete="username"
-						class="ios-input"
-					/>
+					<label for="login-username" class="field-label">Usuario o correo</label>
+					<input id="login-username" name="username" type="text" required autocomplete="username" class="ios-input" />
 				</div>
 
 				<div class="field">
-					<label for="password" class="field-label">Contraseña</label>
-					<input
-						id="password"
-						name="password"
-						type="password"
-						required
-						autocomplete="current-password"
-						class="ios-input"
-					/>
+					<label for="login-password" class="field-label">Contrasena</label>
+					<input id="login-password" name="password" type="password" required autocomplete="current-password" class="ios-input" />
 				</div>
 
 				<p id="login-error" class="alert hidden"></p>
-
 				<button type="submit" class="btn-primary">Ingresar</button>
+			</form>
 
-				<p class="helper">
-					Demos: <strong>admin/admin</strong> o <strong>user/user</strong>
-				</p>
+			<div class="auth-divider"></div>
+
+			<form id="register-form" class="form-stack">
+				<h2 class="auth-section-title">Crear cuenta</h2>
+				<div class="field">
+					<label for="register-username" class="field-label">Usuario o correo</label>
+					<input id="register-username" name="username" type="text" required autocomplete="username" class="ios-input" />
+				</div>
+
+				<div class="field">
+					<label for="register-password" class="field-label">Contrasena</label>
+					<input id="register-password" name="password" type="password" required autocomplete="new-password" class="ios-input" />
+				</div>
+
+				<div class="field">
+					<label for="register-password-confirm" class="field-label">Confirmar contrasena</label>
+					<input id="register-password-confirm" name="passwordConfirm" type="password" required autocomplete="new-password" class="ios-input" />
+				</div>
+
+				<p id="register-error" class="alert hidden"></p>
+				<p id="register-success" class="alert hidden"></p>
+				<button type="submit" class="btn-primary">Crear cuenta</button>
 			</form>
 		</section>
 	</main>
