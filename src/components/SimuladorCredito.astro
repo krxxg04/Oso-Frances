@@ -201,7 +201,16 @@
 
     <form id="historial-filtros" class="form-grid">
       <input id="f-moneda" class="ios-input" placeholder="Moneda (PEN/USD)" />
-      <input id="f-plazo" class="ios-input" type="number" placeholder="Plazo meses" />
+      <select id="f-plazo" class="ios-input">
+        <option value="">Plazo meses</option>
+        <option value="12">12</option>
+        <option value="24">24</option>
+        <option value="36">36</option>
+        <option value="48">48</option>
+        <option value="60">60</option>
+        <option value="72">72</option>
+        <option value="84">84</option>
+      </select>
       <input id="f-vehiculo" class="ios-input" placeholder="Vehículo" />
       <input id="f-monto-min" class="ios-input" type="number" placeholder="Monto mínimo" />
       <input id="f-monto-max" class="ios-input" type="number" placeholder="Monto máximo" />

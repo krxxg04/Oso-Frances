@@ -81,7 +81,7 @@ export default function initSimuladorCredito(): void {
   const historialFormEl = getRequiredEl<HTMLFormElement>('historial-filtros');
   const historialBodyEl = getRequiredEl<HTMLTableSectionElement>('historial-body');
   const fMonedaEl = getRequiredEl<HTMLInputElement>('f-moneda');
-  const fPlazoEl = getRequiredEl<HTMLInputElement>('f-plazo');
+  const fPlazoEl = getRequiredEl<HTMLSelectElement>('f-plazo');
   const fVehiculoEl = getRequiredEl<HTMLInputElement>('f-vehiculo');
   const fMontoMinEl = getRequiredEl<HTMLInputElement>('f-monto-min');
   const fMontoMaxEl = getRequiredEl<HTMLInputElement>('f-monto-max');
