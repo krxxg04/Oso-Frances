@@ -64,11 +64,7 @@ export default function initSimuladorCredito(): void {
   const bancoInfoTextEl = getRequiredEl<HTMLParagraphElement>('banco-info-text');
 
   const manualRateFieldsEl = getRequiredEl<HTMLDivElement>('manual-rate-fields');
-  const tipoTasaEl = getRequiredEl<HTMLSelectElement>('tipoTasa');
-  const tasaAnualEl = getRequiredEl<HTMLInputElement>('tasaAnual');
   const tasaEfectivaAnualEl = getRequiredEl<HTMLInputElement>('tasaEfectivaAnual');
-  const frecuenciaWrapEl = getRequiredEl<HTMLDivElement>('frecuencia-wrap');
-  const frecuenciaCapitalizacionEl = getRequiredEl<HTMLInputElement>('frecuenciaCapitalizacion');
   const seguroDesgravamenAnualEl = getRequiredEl<HTMLInputElement>('seguroDesgravamenAnual');
 
   const resumenGridEl = getRequiredEl<HTMLDivElement>('resumen-grid');
@@ -98,8 +94,6 @@ export default function initSimuladorCredito(): void {
   const updateManualRateVisibility = () => {
     const hasBank = !!bancoIdEl.value;
     manualRateFieldsEl.classList.toggle('hidden', hasBank);
-    if (hasBank) return;
-    frecuenciaWrapEl.classList.toggle('hidden', tipoTasaEl.value !== 'nominal');
   };
 
   const renderBankInfo = (bank: Banco | null) => {
@@ -110,7 +104,9 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoInfoWrapEl.classList.remove('hidden');
-    bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · Tasa anual ${pct(bank.tasaAnual)} · Seguro desgravamen mensual ${pct(bank.seguroDesgravamenMensual)}`;
+    tasaEfectivaAnualEl.value = String(bank.tasaEfectivaAnual);
+    seguroDesgravamenAnualEl.value = String(bank.seguroDesgravamenAnual);
+    bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · TEA ${pct(bank.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pct(bank.seguroDesgravamenMensual)}`;
   };
 
   const applyBankConstraints = (bank: Banco | null) => {
@@ -149,6 +145,8 @@ export default function initSimuladorCredito(): void {
     }
 
     const items: Array<[string, string]> = [
+      ['TEA', pct(result.tasa?.tasaEfectivaAnual ?? 0)],
+      ['Tasa periodo', pct(result.tasaPeriodo ?? 0)],
       ['Monto financiado', money(resumen.montoFinanciado, currency)],
       ['Cuota inicial', money(resumen.cuotaInicial, currency)],
       ['Cuota mensual', money(resumen.cuotaMensual, currency)],
@@ -182,7 +180,7 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoResultCardEl.classList.remove('hidden');
-    bancoResultadoEl.textContent = `${result.banco.nombre} · ${result.banco.producto} · Tasa anual ${pct(result.banco.tasaAnual)} · Seguro desgravamen mensual ${pct(result.banco.seguroDesgravamenMensual)} · Seguro desgravamen anual ${pct(result.banco.seguroDesgravamenAnual)}`;
+    bancoResultadoEl.textContent = `${result.banco.nombre} · ${result.banco.producto} · TEA ${pct(result.banco.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pct(result.banco.seguroDesgravamenMensual)} · Seguro desgravamen anual ${pct(result.banco.seguroDesgravamenAnual)}`;
   };
 
   const renderCronograma = (result: SimulationResult, currency: string) => {
@@ -302,8 +300,6 @@ export default function initSimuladorCredito(): void {
     updateManualRateVisibility();
   });
 
-  tipoTasaEl.addEventListener('change', updateManualRateVisibility);
-
   tipoGraciaEl.addEventListener('change', () => {
     if (tipoGraciaEl.value === 'sin_gracia') {
       periodosGraciaEl.value = '0';
@@ -366,6 +362,7 @@ export default function initSimuladorCredito(): void {
       precioVehiculo: toNumber(precioVehiculoEl),
       porcentajeCuotaInicial: toNumber(porcentajeCuotaInicialEl),
       plazoMeses: Number(plazoMesesEl.value),
+      tasaEfectivaAnual: toNumber(tasaEfectivaAnualEl),
       periodosPorAnio: 12,
       periodosGracia,
       tipoGracia,
@@ -377,14 +374,10 @@ export default function initSimuladorCredito(): void {
     const bank = getSelectedBank();
     if (bank) {
       payload.bancoId = bank.id;
+      payload.tasaEfectivaAnual = bank.tasaEfectivaAnual;
+      payload.seguroDesgravamenAnual = bank.seguroDesgravamenAnual;
     } else {
-      payload.tipoTasa = tipoTasaEl.value;
-      payload.tasaAnual = toNumber(tasaAnualEl);
-      payload.tasaEfectivaAnual = toNumber(tasaEfectivaAnualEl);
       payload.seguroDesgravamenAnual = toNumber(seguroDesgravamenAnualEl);
-      if (tipoTasaEl.value === 'nominal') {
-        payload.frecuenciaCapitalizacion = Math.max(1, Math.trunc(toNumber(frecuenciaCapitalizacionEl)));
-      }
     }
 
     try {
