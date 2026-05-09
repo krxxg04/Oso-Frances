@@ -129,7 +129,7 @@
         </div>
       </div>
 
-      <div id="banco-info" class="card hidden">
+      <div id="banco-info" class="bank-info hidden">
         <p class="card-subtitle" id="banco-info-text"></p>
       </div>
 
@@ -167,7 +167,14 @@
     </div>
 
     <div class="card table-card results-table-card">
-      <div class="table-scroll">
+      <div class="card-header cronograma-head">
+        <div>
+          <h3 class="card-title">Cronograma de pagos</h3>
+          <p id="cronograma-hint" class="card-subtitle">Visualiza el detalle mes a mes.</p>
+        </div>
+        <button type="button" id="toggle-cronograma" class="nav-link">Ocultar</button>
+      </div>
+      <div class="table-scroll table-scroll-y" id="cronograma-scroll">
         <table class="results-table">
           <thead>
             <tr>

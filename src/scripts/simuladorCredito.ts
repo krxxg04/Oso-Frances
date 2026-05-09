@@ -77,6 +77,9 @@ export default function initSimuladorCredito(): void {
   const bancoResultCardEl = getRequiredEl<HTMLDivElement>('banco-result-card');
   const bancoResultadoEl = getRequiredEl<HTMLParagraphElement>('banco-resultado');
   const cronogramaBodyEl = getRequiredEl<HTMLTableSectionElement>('cronograma-body');
+  const cronogramaScrollEl = getRequiredEl<HTMLDivElement>('cronograma-scroll');
+  const toggleCronogramaEl = getRequiredEl<HTMLButtonElement>('toggle-cronograma');
+  const cronogramaHintEl = getRequiredEl<HTMLParagraphElement>('cronograma-hint');
 
   const historialFormEl = getRequiredEl<HTMLFormElement>('historial-filtros');
   const historialBodyEl = getRequiredEl<HTMLTableSectionElement>('historial-body');
@@ -351,9 +354,19 @@ export default function initSimuladorCredito(): void {
     renderResumen(detail, detailCurrency);
     renderBancoResult(detail);
     renderCronograma(detail, detailCurrency);
+    cronogramaScrollEl.classList.remove('hidden');
+    toggleCronogramaEl.textContent = 'Ocultar';
     document.getElementById('resumen-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMessage(okEl, `Simulación ${id} cargada`, false);
   };
+
+  toggleCronogramaEl.addEventListener('click', () => {
+    const isHidden = cronogramaScrollEl.classList.toggle('hidden');
+    toggleCronogramaEl.textContent = isHidden ? 'Mostrar' : 'Ocultar';
+    cronogramaHintEl.textContent = isHidden
+      ? 'Cronograma oculto. Presiona "Mostrar" para verlo.'
+      : 'Visualiza el detalle mes a mes.';
+  });
 
   bancoIdEl.addEventListener('change', () => {
     const bank = getSelectedBank();
@@ -457,6 +470,9 @@ export default function initSimuladorCredito(): void {
       renderResumen(result, payload.moneda);
       renderBancoResult(result);
       renderCronograma(result, payload.moneda);
+      cronogramaScrollEl.classList.remove('hidden');
+      toggleCronogramaEl.textContent = 'Ocultar';
+      cronogramaHintEl.textContent = 'Visualiza el detalle mes a mes.';
       await loadHistory();
       if (!hasResumen && !hasCronograma) {
         setMessage(
