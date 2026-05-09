@@ -91,6 +91,28 @@ export default function initSimuladorCredito(): void {
   let bancos: Banco[] = [];
   let vehiculos: Vehiculo[] = [];
 
+  const normalizeSimulation = (raw: unknown): SimulationResult => {
+    const data = raw as Record<string, unknown> | null;
+    if (!data) return {} as SimulationResult;
+    if (data.item && typeof data.item === 'object') return data.item as SimulationResult;
+    if (data.simulacion && typeof data.simulacion === 'object') return data.simulacion as SimulationResult;
+    return data as SimulationResult;
+  };
+
+  const pickBancoFromSimulation = (sim: SimulationResult): string => {
+    if (sim.banco?.nombre) return sim.banco.nombre;
+
+    const resultObj = sim.result as Record<string, unknown> | undefined;
+    const bancoObj = resultObj?.banco as Record<string, unknown> | undefined;
+    if (typeof bancoObj?.nombre === 'string' && bancoObj.nombre) return bancoObj.nombre;
+
+    const inputObj = (sim as unknown as { input?: Record<string, unknown> }).input;
+    if (typeof inputObj?.bancoNombre === 'string' && inputObj.bancoNombre) return inputObj.bancoNombre;
+    if (typeof inputObj?.bancoId === 'string' && inputObj.bancoId) return inputObj.bancoId;
+
+    return '-';
+  };
+
   const renderPlazos = (plazos: number[]) => {
     const unique = [...new Set(plazos)].sort((a, b) => a - b);
     const options = unique.length > 0 ? unique : [12, 24, 36, 48, 60];
@@ -224,16 +246,17 @@ export default function initSimuladorCredito(): void {
     }
 
     historialBodyEl.innerHTML = items
-      .map((item) => {
+      .map((rawItem) => {
+        const item = normalizeSimulation(rawItem);
         const id = item.id || '';
         const tcea = item.result?.resumen?.tcea ?? 0;
         const totalPagado = item.result?.resumen?.totalPagado ?? 0;
-        const banco = item.banco?.nombre || '-';
+        const banco = pickBancoFromSimulation(item);
         return `
           <tr>
             <td>${id || '-'}</td>
             <td>${banco}</td>
-            <td>${pct(tcea)}</td>
+            <td>${pctNormalized(tcea)}</td>
             <td>${money(totalPagado, 'PEN')}</td>
             <td><button type="button" class="nav-link" data-open-sim="${id}">Abrir</button></td>
           </tr>
@@ -255,7 +278,8 @@ export default function initSimuladorCredito(): void {
 
     try {
       const data = await getSimulations(filters);
-      renderHistory(data.items || []);
+      const items = (data.items || []).map((item) => normalizeSimulation(item));
+      renderHistory(items);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo cargar historial.';
       if (message.includes('HTTP 401')) {
@@ -318,10 +342,16 @@ export default function initSimuladorCredito(): void {
 
   const openSimulationById = async (id: string) => {
     if (!id) return;
-    const detail = await getSimulationById(id);
-    renderResumen(detail, monedaEl.value || 'PEN');
+    const rawDetail = await getSimulationById(id);
+    const detail = normalizeSimulation(rawDetail);
+    const detailCurrency =
+      ((detail as unknown as { input?: { moneda?: string } }).input?.moneda as string | undefined) ||
+      monedaEl.value ||
+      'PEN';
+    renderResumen(detail, detailCurrency);
     renderBancoResult(detail);
-    renderCronograma(detail, monedaEl.value || 'PEN');
+    renderCronograma(detail, detailCurrency);
+    document.getElementById('resumen-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMessage(okEl, `Simulación ${id} cargada`, false);
   };
 
