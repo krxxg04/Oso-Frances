@@ -36,7 +36,7 @@ export default function initLogin(): void {
 
   void hasActiveSession().then((active) => {
     if (active) {
-      sessionStorage.setItem(AUTH_FLAG_KEY, '1');
+      localStorage.setItem(AUTH_FLAG_KEY, '1');
       window.location.assign('/');
     }
   });
@@ -54,7 +54,7 @@ export default function initLogin(): void {
       return;
     }
 
-    sessionStorage.setItem(AUTH_FLAG_KEY, '1');
+    localStorage.setItem(AUTH_FLAG_KEY, '1');
     window.location.assign('/');
   });
 
@@ -95,7 +95,8 @@ export default function initLogin(): void {
       return;
     }
 
-    sessionStorage.setItem(AUTH_FLAG_KEY, '1');
+    localStorage.setItem(AUTH_FLAG_KEY, '1');
     window.location.assign('/');
   });
 }
+

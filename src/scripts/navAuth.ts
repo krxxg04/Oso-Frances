@@ -1,4 +1,4 @@
-﻿import { hasActiveSession, logout } from './auth';
+﻿import { logout } from './auth';
 
 const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
 
@@ -14,24 +14,16 @@ export default function initNavAuth(): void {
 
   if (!loginLink || !logoutButton) return;
 
-  if (!isLoginPage) {
-    // Dentro de la app siempre mostramos salida de sesion en la navbar.
+  if (isLoginPage) {
+    // En login no mostrar ni "Iniciar sesion" ni "Cerrar sesion" en la navbar.
     setHidden(loginLink, true);
-    setHidden(logoutButton, false);
+    setHidden(logoutButton, true);
+    return;
   }
 
-  void hasActiveSession().then((active) => {
-    if (isLoginPage) {
-      setHidden(loginLink, active);
-      setHidden(logoutButton, !active);
-      return;
-    }
-
-    if (!active) {
-      sessionStorage.removeItem(AUTH_FLAG_KEY);
-      window.location.replace('/login');
-    }
-  });
+  // En la app siempre mostrar "Cerrar sesion".
+  setHidden(loginLink, true);
+  setHidden(logoutButton, false);
 
   logoutButton.addEventListener('click', async () => {
     const result = await logout();
@@ -40,7 +32,7 @@ export default function initNavAuth(): void {
       return;
     }
 
-    sessionStorage.removeItem(AUTH_FLAG_KEY);
+    localStorage.removeItem(AUTH_FLAG_KEY);
     window.location.assign('/login');
   });
 }
