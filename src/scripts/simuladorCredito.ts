@@ -288,6 +288,21 @@ export default function initSimuladorCredito(): void {
     moneda: monedaEl.value,
   });
 
+  const validateSimulationInputs = (): string | null => {
+    if (!marcaEl.value.trim()) return 'Ingresa la marca del vehículo.';
+    if (!modeloEl.value.trim()) return 'Ingresa el modelo del vehículo.';
+    if (!Number.isFinite(toNumber(anioEl)) || toNumber(anioEl) < 2000) return 'Ingresa un año válido (>= 2000).';
+    if (!tipoEl.value.trim()) return 'Ingresa el tipo de vehículo.';
+    if (!Number.isFinite(toNumber(precioVehiculoEl)) || toNumber(precioVehiculoEl) <= 0)
+      return 'Ingresa un precio de vehículo mayor a 0.';
+    if (!Number.isFinite(toNumber(porcentajeCuotaInicialEl)) || toNumber(porcentajeCuotaInicialEl) < 0)
+      return 'Ingresa una cuota inicial válida.';
+    if (!Number.isFinite(toNumber(tasaEfectivaAnualEl)) || toNumber(tasaEfectivaAnualEl) <= 0)
+      return 'Ingresa una Tasa Efectiva Anual (TEA) mayor a 0.';
+    if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
+    return null;
+  };
+
   const openSimulationById = async (id: string) => {
     if (!id) return;
     const detail = await getSimulationById(id);
@@ -342,12 +357,9 @@ export default function initSimuladorCredito(): void {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!form.reportValidity()) {
-      setMessage(
-        errorEl,
-        'Revisa los campos obligatorios del formulario (incluyendo los datos del vehículo) e intenta nuevamente.',
-        false
-      );
+    const validationError = validateSimulationInputs();
+    if (validationError) {
+      setMessage(errorEl, validationError, false);
       setMessage(okEl, '', true);
       return;
     }
