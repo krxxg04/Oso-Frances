@@ -8,7 +8,7 @@ import Layout from '../layouts/Layout.astro';
 			<img src="/Whiteosito.png" alt="El Oso Frances" class="login-logo" loading="eager" />
 			<p class="eyebrow login-eyebrow">El Oso Frances</p>
 			<h1 class="login-title">Acceso seguro</h1>
-			<p class="login-subtitle">Crea tu cuenta o inicia sesion para continuar con el simulador.</p>
+			<p id="login-subtitle" class="login-subtitle">Inicia sesion para continuar con el simulador.</p>
 
 			<form id="login-form" class="form-stack">
 				<h2 class="auth-section-title">Iniciar sesion</h2>
@@ -24,11 +24,13 @@ import Layout from '../layouts/Layout.astro';
 
 				<p id="login-error" class="alert hidden"></p>
 				<button type="submit" class="btn-primary">Ingresar</button>
+				<p class="auth-switch">
+					No tienes cuenta?
+					<button id="go-register" type="button" class="auth-switch-link">Crear cuenta</button>
+				</p>
 			</form>
 
-			<div class="auth-divider"></div>
-
-			<form id="register-form" class="form-stack">
+			<form id="register-form" class="form-stack hidden">
 				<h2 class="auth-section-title">Crear cuenta</h2>
 				<div class="field">
 					<label for="register-dni" class="field-label">DNI</label>
@@ -56,6 +58,10 @@ import Layout from '../layouts/Layout.astro';
 				<p id="register-error" class="alert hidden"></p>
 				<p id="register-success" class="alert hidden"></p>
 				<button type="submit" class="btn-primary">Crear cuenta</button>
+				<p class="auth-switch">
+					Ya tienes cuenta?
+					<button id="go-login" type="button" class="auth-switch-link">Iniciar sesion</button>
+				</p>
 			</form>
 		</section>
 	</main>

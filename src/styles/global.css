@@ -484,6 +484,23 @@ body::-webkit-scrollbar-thumb {
 	margin: 22px 0;
 }
 
+.auth-switch {
+	margin: 2px 0 0;
+	font-size: 0.84rem;
+	color: var(--plomo-2);
+	text-align: center;
+}
+
+.auth-switch-link {
+	background: transparent;
+	border: 0;
+	color: #f2f2f7;
+	font-weight: 600;
+	cursor: pointer;
+	padding: 0;
+	margin-left: 6px;
+}
+
 @media (max-width: 640px) {
 	.nav-inner {
 		flex-direction: column;

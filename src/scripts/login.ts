@@ -19,6 +19,9 @@ const setHidden = (el: HTMLElement, hidden: boolean) => {
 export default function initLogin(): void {
   const loginForm = getRequiredEl<HTMLFormElement>('login-form');
   const registerForm = getRequiredEl<HTMLFormElement>('register-form');
+  const loginSubtitle = getRequiredEl<HTMLParagraphElement>('login-subtitle');
+  const goRegisterBtn = getRequiredEl<HTMLButtonElement>('go-register');
+  const goLoginBtn = getRequiredEl<HTMLButtonElement>('go-login');
   const loginUsernameEl = getRequiredEl<HTMLInputElement>('login-username');
   const loginPasswordEl = getRequiredEl<HTMLInputElement>('login-password');
   const registerDniEl = getRequiredEl<HTMLInputElement>('register-dni');
@@ -33,6 +36,24 @@ export default function initLogin(): void {
   setHidden(loginErrorEl, true);
   setHidden(registerErrorEl, true);
   setHidden(registerSuccessEl, true);
+
+  const showLogin = () => {
+    setHidden(registerForm, true);
+    setHidden(loginForm, false);
+    loginSubtitle.textContent = 'Inicia sesion para continuar con el simulador.';
+    setHidden(registerErrorEl, true);
+    setHidden(registerSuccessEl, true);
+  };
+
+  const showRegister = () => {
+    setHidden(loginForm, true);
+    setHidden(registerForm, false);
+    loginSubtitle.textContent = 'Crea tu cuenta para acceder al simulador.';
+    setHidden(loginErrorEl, true);
+  };
+
+  goRegisterBtn.addEventListener('click', showRegister);
+  goLoginBtn.addEventListener('click', showLogin);
 
   void hasActiveSession().then((active) => {
     if (active) {
@@ -89,9 +110,10 @@ export default function initLogin(): void {
 
     const loginAfterRegister = await login(registerUsernameEl.value, password);
     if (!loginAfterRegister.ok) {
-      registerSuccessEl.textContent = 'Cuenta creada. Inicia sesion para continuar.';
+      registerSuccessEl.textContent = 'Cuenta creada. Ahora inicia sesion.';
       setHidden(registerSuccessEl, false);
       registerForm.reset();
+      showLogin();
       return;
     }
 
