@@ -19,6 +19,7 @@ export default function initLogin(): void {
   const registerForm = getRequiredEl<HTMLFormElement>('register-form');
   const loginUsernameEl = getRequiredEl<HTMLInputElement>('login-username');
   const loginPasswordEl = getRequiredEl<HTMLInputElement>('login-password');
+  const registerDniEl = getRequiredEl<HTMLInputElement>('register-dni');
   const registerUsernameEl = getRequiredEl<HTMLInputElement>('register-username');
   const registerEmailEl = getRequiredEl<HTMLInputElement>('register-email');
   const registerPasswordEl = getRequiredEl<HTMLInputElement>('register-password');
@@ -66,7 +67,12 @@ export default function initLogin(): void {
       return;
     }
 
-    const result = await register(registerUsernameEl.value, registerEmailEl.value, password);
+    const result = await register(
+      registerDniEl.value,
+      registerEmailEl.value,
+      registerUsernameEl.value,
+      password
+    );
     if (!result.ok) {
       registerErrorEl.textContent = result.message ?? 'No se pudo crear la cuenta.';
       setHidden(registerErrorEl, false);

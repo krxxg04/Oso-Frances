@@ -58,31 +58,34 @@ async function postAuth(path: string, body: Record<string, unknown>, fallbackErr
   }
 }
 
-export async function register(username: string, email: string, password: string): Promise<AuthResult> {
+export async function register(dni: string, email: string, username: string, password: string): Promise<AuthResult> {
+  const dniValue = dni.trim();
   const user = username.trim();
   const mail = email.trim().toLowerCase();
 
-  if (!user || !mail || !password) {
-    return { ok: false, message: 'Usuario, correo y contrasena son obligatorios.' };
+  if (!dniValue || !user || !mail || !password) {
+    return { ok: false, message: 'DNI, usuario, gmail y contrasena son obligatorios.' };
+  }
+
+  if (!/^\d{8}$/.test(dniValue)) {
+    return { ok: false, message: 'El DNI debe tener 8 digitos.' };
   }
 
   if (!mail.includes('@')) {
-    return { ok: false, message: 'Ingresa un correo valido para crear la cuenta.' };
+    return { ok: false, message: 'Ingresa un gmail valido para crear la cuenta.' };
   }
 
-  return postAuth('/api/v1/auth/register', { username: user, email: mail, password }, 'No se pudo crear la cuenta.');
+  return postAuth(
+    '/api/v1/auth/register',
+    { dni: dniValue, username: user, email: mail, password },
+    'No se pudo crear la cuenta.'
+  );
 }
 
-export async function login(usernameOrEmail: string, password: string): Promise<AuthResult> {
-  const identifier = usernameOrEmail.trim();
-  if (!identifier || !password) return { ok: false, message: 'Usuario/correo y contrasena son obligatorios.' };
-
-  const isEmail = identifier.includes('@');
-  return postAuth(
-    '/api/v1/auth/login',
-    isEmail ? { email: identifier.toLowerCase(), password } : { username: identifier, password },
-    'Credenciales invalidas.'
-  );
+export async function login(username: string, password: string): Promise<AuthResult> {
+  const user = username.trim();
+  if (!user || !password) return { ok: false, message: 'Usuario y contrasena son obligatorios.' };
+  return postAuth('/api/v1/auth/login', { username: user, password }, 'Credenciales invalidas.');
 }
 
 export async function logout(): Promise<AuthResult> {
