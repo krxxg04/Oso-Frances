@@ -1,5 +1,7 @@
 ﻿import { hasActiveSession, logout } from './auth';
 
+const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
+
 const setHidden = (el: HTMLElement, hidden: boolean) => {
   if (hidden) el.classList.add('hidden');
   else el.classList.remove('hidden');
@@ -23,6 +25,7 @@ export default function initNavAuth(): void {
       return;
     }
 
+    sessionStorage.removeItem(AUTH_FLAG_KEY);
     window.location.assign('/login');
   });
 }

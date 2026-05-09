@@ -1,5 +1,7 @@
 ﻿import { hasActiveSession, login, register } from './auth';
 
+const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
+
 const getRequiredEl = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);
   if (!element) throw new Error(`No se encontro el elemento #${id}`);
@@ -33,7 +35,10 @@ export default function initLogin(): void {
   setHidden(registerSuccessEl, true);
 
   void hasActiveSession().then((active) => {
-    if (active) window.location.assign('/');
+    if (active) {
+      sessionStorage.setItem(AUTH_FLAG_KEY, '1');
+      window.location.assign('/');
+    }
   });
 
   loginForm.addEventListener('submit', async (event) => {
@@ -49,6 +54,7 @@ export default function initLogin(): void {
       return;
     }
 
+    sessionStorage.setItem(AUTH_FLAG_KEY, '1');
     window.location.assign('/');
   });
 
@@ -74,14 +80,22 @@ export default function initLogin(): void {
       password,
       passwordConfirm
     );
+
     if (!result.ok) {
       registerErrorEl.textContent = result.message ?? 'No se pudo crear la cuenta.';
       setHidden(registerErrorEl, false);
       return;
     }
 
-    registerSuccessEl.textContent = 'Cuenta creada. Ahora puedes iniciar sesion.';
-    setHidden(registerSuccessEl, false);
-    registerForm.reset();
+    const loginAfterRegister = await login(registerUsernameEl.value, password);
+    if (!loginAfterRegister.ok) {
+      registerSuccessEl.textContent = 'Cuenta creada. Inicia sesion para continuar.';
+      setHidden(registerSuccessEl, false);
+      registerForm.reset();
+      return;
+    }
+
+    sessionStorage.setItem(AUTH_FLAG_KEY, '1');
+    window.location.assign('/');
   });
 }
