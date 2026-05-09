@@ -75,6 +75,15 @@ export default function initLogin(): void {
       return;
     }
 
+    const active = await hasActiveSession();
+    if (!active) {
+      loginErrorEl.textContent =
+        'Se inicio sesion, pero no se pudo persistir la cookie de sesion. Revisa cookies de terceros, CORS y credenciales.';
+      setHidden(loginErrorEl, false);
+      localStorage.removeItem(AUTH_FLAG_KEY);
+      return;
+    }
+
     localStorage.setItem(AUTH_FLAG_KEY, '1');
     window.location.assign('/');
   });
@@ -114,6 +123,17 @@ export default function initLogin(): void {
       setHidden(registerSuccessEl, false);
       registerForm.reset();
       showLogin();
+      return;
+    }
+
+    const active = await hasActiveSession();
+    if (!active) {
+      registerSuccessEl.textContent =
+        'Cuenta creada y credenciales validas, pero no se pudo guardar la cookie de sesion.';
+      setHidden(registerSuccessEl, false);
+      registerForm.reset();
+      showLogin();
+      localStorage.removeItem(AUTH_FLAG_KEY);
       return;
     }
 
