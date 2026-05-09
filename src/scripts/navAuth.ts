@@ -10,12 +10,27 @@ const setHidden = (el: HTMLElement, hidden: boolean) => {
 export default function initNavAuth(): void {
   const loginLink = document.getElementById('nav-login-link') as HTMLAnchorElement | null;
   const logoutButton = document.getElementById('nav-logout-btn') as HTMLButtonElement | null;
+  const isLoginPage = window.location.pathname === '/login';
 
   if (!loginLink || !logoutButton) return;
 
+  if (!isLoginPage) {
+    // Dentro de la app siempre mostramos salida de sesion en la navbar.
+    setHidden(loginLink, true);
+    setHidden(logoutButton, false);
+  }
+
   void hasActiveSession().then((active) => {
-    setHidden(loginLink, active);
-    setHidden(logoutButton, !active);
+    if (isLoginPage) {
+      setHidden(loginLink, active);
+      setHidden(logoutButton, !active);
+      return;
+    }
+
+    if (!active) {
+      sessionStorage.removeItem(AUTH_FLAG_KEY);
+      window.location.replace('/login');
+    }
   });
 
   logoutButton.addEventListener('click', async () => {
