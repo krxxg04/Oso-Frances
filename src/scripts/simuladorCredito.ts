@@ -299,6 +299,13 @@ export default function initSimuladorCredito(): void {
       return 'Ingresa una cuota inicial válida.';
     if (!Number.isFinite(toNumber(tasaEfectivaAnualEl)) || toNumber(tasaEfectivaAnualEl) <= 0)
       return 'Ingresa una Tasa Efectiva Anual (TEA) mayor a 0.';
+    if (toNumber(tasaEfectivaAnualEl) > 100) return 'La TEA debe estar entre 0 y 100.';
+    if (!bancoIdEl.value) {
+      const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
+      if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual válido.';
+      if (seguroDesgravamen < 0 || seguroDesgravamen > 100)
+        return 'El seguro de desgravamen anual debe estar entre 0 y 100.';
+    }
     if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
     return null;
   };
