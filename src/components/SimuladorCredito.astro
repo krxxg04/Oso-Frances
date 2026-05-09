@@ -68,26 +68,40 @@
         </div>
 
         <div class="field">
-          <label for="tasaNominal" class="field-label">Tasa nominal (TN)</label>
+          <label for="banco" class="field-label">Banco</label>
+          <select id="banco" name="banco" class="ios-input" required>
+            <option value="bbva">BBVA</option>
+            <option value="bcp">BCP</option>
+            <option value="interbank">Interbank</option>
+            <option value="scotiabank">Scotiabank</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="tasaEfectivaAnual" class="field-label">Tasa efectiva anual (TEA %)</label>
           <input
-            id="tasaNominal"
-            name="tasaNominal"
+            id="tasaEfectivaAnual"
+            name="tasaEfectivaAnual"
             type="number"
             min="0"
+            max="40"
             step="0.0001"
+            value="14"
             required
             class="ios-input"
           />
         </div>
 
         <div class="field">
-          <label for="frecuenciaCapitalizacion" class="field-label">Frecuencia de capitalización (m)</label>
+          <label for="seguroDesgravamen" class="field-label">Seguro de desgravamen mensual (%)</label>
           <input
-            id="frecuenciaCapitalizacion"
-            name="frecuenciaCapitalizacion"
+            id="seguroDesgravamen"
+            name="seguroDesgravamen"
             type="number"
-            min="1"
-            step="1"
+            min="0"
+            max="5"
+            step="0.0001"
+            value="0.01"
             required
             class="ios-input"
           />
@@ -119,6 +133,7 @@
         <div class="field">
           <label for="tipoGracia" class="field-label">Tipo de gracia</label>
           <select id="tipoGracia" name="tipoGracia" class="ios-input">
+            <option value="sin_gracia">Sin período de gracia</option>
             <option value="total">Total</option>
             <option value="parcial">Parcial</option>
           </select>

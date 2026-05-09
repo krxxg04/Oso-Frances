@@ -8,33 +8,28 @@ export interface Pago {
 
 const toInt = (n: number): number => (Number.isFinite(n) ? Math.trunc(n) : 0);
 
-// Fórmulas de interés compuesto con TN (tasa nominal) y capitalización m
-// Valor Futuro: S = C * (1 + TN/m)^n
-export function calcularValorFuturo(C: number, TN: number, m: number, n: number): number {
-    if (!Number.isFinite(C) || !Number.isFinite(TN) || !Number.isFinite(m) || !Number.isFinite(n) || m <= 0) {
+// Fórmulas de interés compuesto con TEA (tasa efectiva anual)
+// Valor Futuro: S = C * (1 + i)^n
+export function calcularValorFuturo(C: number, i: number, n: number): number {
+    if (!Number.isFinite(C) || !Number.isFinite(i) || !Number.isFinite(n)) {
         return Number.NaN;
     }
-    return C * Math.pow(1 + TN / m, n);
+    return C * Math.pow(1 + i, n);
 }
 
-// Valor Presente: C = S * (1 + TN/m)^(-n)
-export function calcularValorPresente(S: number, TN: number, m: number, n: number): number {
-    if (!Number.isFinite(S) || !Number.isFinite(TN) || !Number.isFinite(m) || !Number.isFinite(n) || m <= 0) {
+// Valor Presente: C = S * (1 + i)^(-n)
+export function calcularValorPresente(S: number, i: number, n: number): number {
+    if (!Number.isFinite(S) || !Number.isFinite(i) || !Number.isFinite(n)) {
         return Number.NaN;
     }
-    return S * Math.pow(1 + TN / m, -n);
+    return S * Math.pow(1 + i, -n);
 }
 
-// Conversión de TN a tasa efectiva
-// i = (1 + TN/m)^n - 1
-export function tasaEfectivaDesdeNominal(TN: number, m: number, n: number): number {
-    if (!Number.isFinite(TN) || !Number.isFinite(m) || !Number.isFinite(n) || m <= 0) return Number.NaN;
-    return Math.pow(1 + TN / m, n) - 1;
-}
-
-// Tasa efectiva mensual (plazo ingresado en meses)
-export function tasaEfectivaMensualDesdeTN(TN: number, m: number): number {
-    return tasaEfectivaDesdeNominal(TN, m, m / 12);
+// Conversión de TEA a tasa efectiva mensual:
+// i_mensual = (1 + TEA)^(1/12) - 1
+export function tasaEfectivaMensualDesdeTEA(tea: number): number {
+    if (!Number.isFinite(tea) || tea <= -1) return Number.NaN;
+    return Math.pow(1 + tea, 1 / 12) - 1;
 }
 
 const calcularCuotaFrances = (capital: number, tasaPeriodo: number, n: number): number => {
@@ -44,9 +39,9 @@ const calcularCuotaFrances = (capital: number, tasaPeriodo: number, n: number): 
     return (capital * tasaPeriodo) / (1 - Math.pow(1 + tasaPeriodo, -n));
 };
 
-// Cuota fija mensual (Método Francés), usando TN anual y m capitalizaciones por año.
-export function calcularCuotaFija(C: number, TN: number, m: number, n: number): number {
-    const tasaMensual = tasaEfectivaMensualDesdeTN(TN, m);
+// Cuota fija mensual (Método Francés), usando TEA.
+export function calcularCuotaFija(C: number, tea: number, n: number): number {
+    const tasaMensual = tasaEfectivaMensualDesdeTEA(tea);
     return calcularCuotaFrances(C, tasaMensual, toInt(n));
 }
 
@@ -55,17 +50,19 @@ export function calcularCuotaFija(C: number, TN: number, m: number, n: number): 
 // - Gracia parcial: se paga solo interés; el saldo no amortiza.
 export function generarCronograma(
     C: number,
-    TN: number,
-    m: number,
+    tea: number,
     n: number,
     periodosGracia: number,
-    tipoGracia: 'total' | 'parcial'
+    tipoGracia: 'sin_gracia' | 'total' | 'parcial'
 ): Pago[] {
     const meses = Math.max(0, toInt(n));
-    const gracia = Math.min(meses, Math.max(0, toInt(periodosGracia)));
+    const gracia =
+        tipoGracia === 'sin_gracia'
+            ? 0
+            : Math.min(meses, Math.max(0, toInt(periodosGracia)));
     if (meses === 0) return [];
 
-    const tasaMensual = tasaEfectivaMensualDesdeTN(TN, m);
+    const tasaMensual = tasaEfectivaMensualDesdeTEA(tea);
     if (!Number.isFinite(tasaMensual) || tasaMensual < 0) return [];
 
     const cronograma: Pago[] = [];
