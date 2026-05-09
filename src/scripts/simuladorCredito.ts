@@ -163,7 +163,11 @@ export default function initSimuladorCredito(): void {
       periodosGraciaEl.value = String(bank.periodosGraciaMax);
     }
 
-    renderPlazos(bank.plazosMeses || []);
+    const plazosBanco = bank.plazosMeses || [];
+    renderPlazos(plazosBanco);
+    if (!plazosBanco.includes(Number(plazoMesesEl.value)) && plazosBanco.length > 0) {
+      plazoMesesEl.value = String(plazosBanco[0]);
+    }
   };
 
   const getSelectedBank = (): Banco | null => bancos.find((item) => item.id === bancoIdEl.value) ?? null;
