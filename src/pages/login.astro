@@ -31,8 +31,12 @@ import Layout from '../layouts/Layout.astro';
 			<form id="register-form" class="form-stack">
 				<h2 class="auth-section-title">Crear cuenta</h2>
 				<div class="field">
-					<label for="register-username" class="field-label">Usuario o correo</label>
+					<label for="register-username" class="field-label">Usuario</label>
 					<input id="register-username" name="username" type="text" required autocomplete="username" class="ios-input" />
+				</div>
+				<div class="field">
+					<label for="register-email" class="field-label">Correo</label>
+					<input id="register-email" name="email" type="email" required autocomplete="email" class="ios-input" />
 				</div>
 
 				<div class="field">
