@@ -29,8 +29,7 @@ export type Banco = {
   nombre: string;
   producto: string;
   moneda: string;
-  tipoTasa: string;
-  tasaAnual: number;
+  tasaEfectivaAnual: number;
   seguroDesgravamenMensual: number;
   seguroDesgravamenAnual: number;
   montoMin: number;
@@ -59,16 +58,13 @@ export type SimulationCreatePayload = {
   precioVehiculo: number;
   porcentajeCuotaInicial: number;
   plazoMeses: number;
+  tasaEfectivaAnual: number;
   periodosPorAnio: number;
   periodosGracia: number;
   tipoGracia: TipoGracia;
   cuotaFinalBalloon: number;
   seguroVehicularMensual: number;
   fechaInicio: string;
-  tipoTasa?: string;
-  tasaAnual?: number;
-  tasaEfectivaAnual?: number;
-  frecuenciaCapitalizacion?: number;
   seguroDesgravamenAnual?: number;
 };
 
@@ -85,6 +81,10 @@ export type SimulationFilters = {
 export type SimulationResult = {
   id?: string;
   banco?: Banco;
+  tasa?: {
+    tasaEfectivaAnual: number;
+  };
+  tasaPeriodo?: number;
   resumen?: {
     montoFinanciado: number;
     cuotaInicial: number;
