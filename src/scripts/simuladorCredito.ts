@@ -41,6 +41,7 @@ export default function initSimuladorCredito(): void {
   const form = getRequiredEl<HTMLFormElement>('simulador-form');
   const errorEl = getRequiredEl<HTMLParagraphElement>('simulador-error');
   const okEl = getRequiredEl<HTMLParagraphElement>('simulador-ok');
+  const btnCalcularEl = getRequiredEl<HTMLButtonElement>('btn-calcular');
 
   const vehiculoIdEl = getRequiredEl<HTMLSelectElement>('vehiculoId');
   const marcaEl = getRequiredEl<HTMLInputElement>('marca');
@@ -138,7 +139,7 @@ export default function initSimuladorCredito(): void {
   const getSelectedBank = (): Banco | null => bancos.find((item) => item.id === bancoIdEl.value) ?? null;
 
   const renderResumen = (result: SimulationResult, currency: string) => {
-    const resumen = result.resumen;
+    const resumen = result.result?.resumen;
     if (!resumen) {
       resumenGridEl.innerHTML = '';
       return;
@@ -184,7 +185,7 @@ export default function initSimuladorCredito(): void {
   };
 
   const renderCronograma = (result: SimulationResult, currency: string) => {
-    const cronograma = result.cronograma || [];
+    const cronograma = result.result?.cronograma || [];
     cronogramaBodyEl.innerHTML = cronograma
       .map(
         (row) => `
@@ -216,8 +217,8 @@ export default function initSimuladorCredito(): void {
     historialBodyEl.innerHTML = items
       .map((item) => {
         const id = item.id || '';
-        const tcea = item.resumen?.tcea ?? 0;
-        const totalPagado = item.resumen?.totalPagado ?? 0;
+        const tcea = item.result?.resumen?.tcea ?? 0;
+        const totalPagado = item.result?.resumen?.totalPagado ?? 0;
         const banco = item.banco?.nombre || '-';
         return `
           <tr>
@@ -338,10 +339,20 @@ export default function initSimuladorCredito(): void {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!form.reportValidity()) return;
+    if (!form.reportValidity()) {
+      setMessage(
+        errorEl,
+        'Revisa los campos obligatorios del formulario (incluyendo los datos del vehículo) e intenta nuevamente.',
+        false
+      );
+      setMessage(okEl, '', true);
+      return;
+    }
 
     setMessage(errorEl, '', true);
     setMessage(okEl, '', true);
+    btnCalcularEl.disabled = true;
+    btnCalcularEl.textContent = 'Simulando...';
 
     const tipoGracia = tipoGraciaEl.value as TipoGracia;
     const periodosGracia = Math.max(0, Math.trunc(toNumber(periodosGraciaEl)));
@@ -389,6 +400,9 @@ export default function initSimuladorCredito(): void {
       setMessage(okEl, 'Simulación generada correctamente.', false);
     } catch (error) {
       setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo generar la simulación.', false);
+    } finally {
+      btnCalcularEl.disabled = false;
+      btnCalcularEl.textContent = 'Simular crédito';
     }
   });
 
