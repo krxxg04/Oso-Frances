@@ -409,10 +409,21 @@ export default function initSimuladorCredito(): void {
 
     try {
       const result = await createSimulation(payload);
+      const hasResumen = !!result.result?.resumen;
+      const hasCronograma = (result.result?.cronograma ?? []).length > 0;
       renderResumen(result, payload.moneda);
       renderBancoResult(result);
       renderCronograma(result, payload.moneda);
       await loadHistory();
+      if (!hasResumen && !hasCronograma) {
+        setMessage(
+          errorEl,
+          'La API respondio sin datos de simulacion. Verifica que /api/v1/simulaciones devuelva result.resumen y result.cronograma.',
+          false
+        );
+        return;
+      }
+
       setMessage(okEl, 'Simulación generada correctamente.', false);
     } catch (error) {
       setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo generar la simulación.', false);
