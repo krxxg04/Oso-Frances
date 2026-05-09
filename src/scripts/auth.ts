@@ -26,6 +26,10 @@ const buildErrorMessage = (status: number, payload: unknown, fallback: string): 
   if (data?.message && typeof data.message === 'string') return data.message;
   if (data?.error && typeof data.error === 'string') return data.error;
 
+  if (payload && typeof payload === 'object') {
+    return `${fallback} (HTTP ${status}) - ${JSON.stringify(payload)}`;
+  }
+
   return `${fallback} (HTTP ${status})`;
 };
 
@@ -81,25 +85,11 @@ export async function register(dni: string, email: string, username: string, pas
     return { ok: false, message: 'Ingresa un gmail valido para crear la cuenta.' };
   }
 
-  const primary = await postAuth(
+  return postAuth(
     '/api/v1/auth/register',
     { dni: dniValue, username: user, email: mail, password },
     'No se pudo crear la cuenta.'
   );
-  if (primary.ok) return primary;
-
-  // Compatibilidad: algunos backends no aceptan "dni" en register.
-  if ((primary.message ?? '').includes('HTTP 400')) {
-    const fallback = await postAuth(
-      '/api/v1/auth/register',
-      { username: user, email: mail, password },
-      'No se pudo crear la cuenta.'
-    );
-    if (fallback.ok) return fallback;
-    return fallback;
-  }
-
-  return primary;
 }
 
 export async function login(username: string, password: string): Promise<AuthResult> {
