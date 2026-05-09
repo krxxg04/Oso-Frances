@@ -35,6 +35,9 @@ const toNumber = (input: HTMLInputElement): number => {
 const setMessage = (el: HTMLElement, message: string, hidden: boolean) => {
   el.textContent = message;
   el.classList.toggle('hidden', hidden);
+  if (!hidden) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 };
 
 export default function initSimuladorCredito(): void {
@@ -351,8 +354,6 @@ export default function initSimuladorCredito(): void {
 
     setMessage(errorEl, '', true);
     setMessage(okEl, '', true);
-    btnCalcularEl.disabled = true;
-    btnCalcularEl.textContent = 'Simulando...';
 
     const tipoGracia = tipoGraciaEl.value as TipoGracia;
     const periodosGracia = Math.max(0, Math.trunc(toNumber(periodosGraciaEl)));
@@ -366,6 +367,9 @@ export default function initSimuladorCredito(): void {
       setMessage(errorEl, 'Si el tipo de gracia es parcial o total, periodosGracia debe ser mayor a 0.', false);
       return;
     }
+
+    btnCalcularEl.disabled = true;
+    btnCalcularEl.textContent = 'Simulando...';
 
     const payload: SimulationCreatePayload = {
       moneda: monedaEl.value,
