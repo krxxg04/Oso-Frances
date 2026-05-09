@@ -23,18 +23,15 @@ import SimuladorCredito from '../components/SimuladorCredito.astro';
     window.location.replace('/login');
   };
 
-  if (localStorage.getItem(AUTH_FLAG_KEY) === '1') {
-    showApp();
-  } else {
-    void hasActiveSession().then((ok) => {
-      if (ok) {
-        localStorage.setItem(AUTH_FLAG_KEY, '1');
-        showApp();
-        return;
-      }
+  void hasActiveSession().then((ok) => {
+    if (ok) {
+      localStorage.setItem(AUTH_FLAG_KEY, '1');
+      showApp();
+      return;
+    }
 
-      goLogin();
-    });
-  }
+    localStorage.removeItem(AUTH_FLAG_KEY);
+    goLogin();
+  });
 </script>
 

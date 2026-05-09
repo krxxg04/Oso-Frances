@@ -1,4 +1,4 @@
-import {
+Ôªøimport {
   createSimulation,
   createVehicle,
   getBanks,
@@ -110,7 +110,7 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoInfoWrapEl.classList.remove('hidden');
-    bancoInfoTextEl.textContent = `${bank.nombre} ∑ ${bank.producto} ∑ Tasa anual ${pct(bank.tasaAnual)} ∑ Seguro desgravamen mensual ${pct(bank.seguroDesgravamenMensual)}`;
+    bancoInfoTextEl.textContent = `${bank.nombre} ¬∑ ${bank.producto} ¬∑ Tasa anual ${pct(bank.tasaAnual)} ¬∑ Seguro desgravamen mensual ${pct(bank.seguroDesgravamenMensual)}`;
   };
 
   const applyBankConstraints = (bank: Banco | null) => {
@@ -159,7 +159,7 @@ export default function initSimuladorCredito(): void {
       ['TCEA', pct(resumen.tcea)],
       ['VAN', money(resumen.van, currency)],
       ['TIR', pct(resumen.tir)],
-      ['Fecha finalizaciÛn', resumen.fechaFinalizacion || '-'],
+      ['Fecha finalizaci√≥n', resumen.fechaFinalizacion || '-'],
     ];
 
     resumenGridEl.innerHTML = items
@@ -182,7 +182,7 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoResultCardEl.classList.remove('hidden');
-    bancoResultadoEl.textContent = `${result.banco.nombre} ∑ ${result.banco.producto} ∑ Tasa anual ${pct(result.banco.tasaAnual)} ∑ Seguro desgravamen mensual ${pct(result.banco.seguroDesgravamenMensual)} ∑ Seguro desgravamen anual ${pct(result.banco.seguroDesgravamenAnual)}`;
+    bancoResultadoEl.textContent = `${result.banco.nombre} ¬∑ ${result.banco.producto} ¬∑ Tasa anual ${pct(result.banco.tasaAnual)} ¬∑ Seguro desgravamen mensual ${pct(result.banco.seguroDesgravamenMensual)} ¬∑ Seguro desgravamen anual ${pct(result.banco.seguroDesgravamenAnual)}`;
   };
 
   const renderCronograma = (result: SimulationResult, currency: string) => {
@@ -245,8 +245,18 @@ export default function initSimuladorCredito(): void {
       fechaHasta: fFechaHastaEl.value || undefined,
     };
 
-    const data = await getSimulations(filters);
-    renderHistory(data.items || []);
+    try {
+      const data = await getSimulations(filters);
+      renderHistory(data.items || []);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo cargar historial.';
+      if (message.includes('HTTP 401')) {
+        historialBodyEl.innerHTML =
+          '<tr><td colspan="5">Sesi√≥n no autorizada para historial (401). Inicia sesi√≥n nuevamente.</td></tr>';
+        return;
+      }
+      throw error;
+    }
   };
 
   const loadBanks = async () => {
@@ -262,7 +272,7 @@ export default function initSimuladorCredito(): void {
     const data = await getVehicles();
     vehiculos = data.items || [];
 
-    vehiculoIdEl.innerHTML = `<option value="">No usar vehÌculo guardado</option>${vehiculos
+    vehiculoIdEl.innerHTML = `<option value="">No usar veh√≠culo guardado</option>${vehiculos
       .map((v) => `<option value="${v.id || ''}">${v.marca} ${v.modelo} (${v.anio})</option>`)
       .join('')}`;
   };
@@ -282,7 +292,7 @@ export default function initSimuladorCredito(): void {
     renderResumen(detail, monedaEl.value || 'PEN');
     renderBancoResult(detail);
     renderCronograma(detail, monedaEl.value || 'PEN');
-    setMessage(okEl, `SimulaciÛn ${id} cargada`, false);
+    setMessage(okEl, `Simulaci√≥n ${id} cargada`, false);
   };
 
   bancoIdEl.addEventListener('change', () => {
@@ -324,9 +334,9 @@ export default function initSimuladorCredito(): void {
       const vehiculo = selectedVehicleData();
       await createVehicle(vehiculo);
       await loadVehicles();
-      setMessage(okEl, 'VehÌculo registrado correctamente.', false);
+      setMessage(okEl, 'Veh√≠culo registrado correctamente.', false);
     } catch (error) {
-      setMessage(errorEl, error instanceof Error ? error.message : 'Error al registrar vehÌculo.', false);
+      setMessage(errorEl, error instanceof Error ? error.message : 'Error al registrar veh√≠culo.', false);
     }
   });
 
@@ -383,9 +393,9 @@ export default function initSimuladorCredito(): void {
       renderBancoResult(result);
       renderCronograma(result, payload.moneda);
       await loadHistory();
-      setMessage(okEl, 'SimulaciÛn generada correctamente.', false);
+      setMessage(okEl, 'Simulaci√≥n generada correctamente.', false);
     } catch (error) {
-      setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo generar la simulaciÛn.', false);
+      setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo generar la simulaci√≥n.', false);
     }
   });
 
@@ -430,7 +440,8 @@ export default function initSimuladorCredito(): void {
     setMessage(okEl, '', true);
 
     try {
-      await Promise.all([loadBanks(), loadVehicles(), loadHistory()]);
+      await Promise.all([loadBanks(), loadVehicles()]);
+      await loadHistory();
       updateManualRateVisibility();
       applyBankConstraints(null);
       tipoGraciaEl.dispatchEvent(new Event('change'));
@@ -441,3 +452,4 @@ export default function initSimuladorCredito(): void {
 
   void boot();
 }
+
