@@ -86,6 +86,10 @@ export type SimulationResult = {
   };
   tasaPeriodo?: number;
   result?: {
+    tasa?: {
+      tasaEfectivaAnual: number;
+    };
+    tasaPeriodo?: number;
     resumen?: {
       montoFinanciado: number;
       cuotaInicial: number;

@@ -26,6 +26,11 @@ const money = (value: number, currency: string): string =>
   }).format(Number.isFinite(value) ? value : 0);
 
 const pct = (value: number): string => `${(Number(value) || 0).toFixed(4)}%`;
+const pctNormalized = (value: number): string => {
+  const n = Number(value) || 0;
+  const percent = Math.abs(n) <= 1 ? n * 100 : n;
+  return `${percent.toFixed(4)}%`;
+};
 
 const toNumber = (input: HTMLInputElement): number => {
   const value = Number(input.value);
@@ -35,9 +40,6 @@ const toNumber = (input: HTMLInputElement): number => {
 const setMessage = (el: HTMLElement, message: string, hidden: boolean) => {
   el.textContent = message;
   el.classList.toggle('hidden', hidden);
-  if (!hidden) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
 };
 
 export default function initSimuladorCredito(): void {
@@ -148,9 +150,13 @@ export default function initSimuladorCredito(): void {
       return;
     }
 
+    const tasaEfectivaAnualValue =
+      result.result?.tasa?.tasaEfectivaAnual ?? result.tasa?.tasaEfectivaAnual ?? 0;
+    const tasaPeriodoValue = result.result?.tasaPeriodo ?? result.tasaPeriodo ?? 0;
+
     const items: Array<[string, string]> = [
-      ['TEA', pct(result.tasa?.tasaEfectivaAnual ?? 0)],
-      ['Tasa periodo', pct(result.tasaPeriodo ?? 0)],
+      ['TEA', pctNormalized(tasaEfectivaAnualValue)],
+      ['Tasa periodo', pctNormalized(tasaPeriodoValue)],
       ['Monto financiado', money(resumen.montoFinanciado, currency)],
       ['Cuota inicial', money(resumen.cuotaInicial, currency)],
       ['Cuota mensual', money(resumen.cuotaMensual, currency)],
@@ -158,9 +164,9 @@ export default function initSimuladorCredito(): void {
       ['Total intereses', money(resumen.totalIntereses, currency)],
       ['Total seguros', money(resumen.totalSeguros, currency)],
       ['Total pagado', money(resumen.totalPagado, currency)],
-      ['TCEA', pct(resumen.tcea)],
+      ['TCEA', pctNormalized(resumen.tcea)],
       ['VAN', money(resumen.van, currency)],
-      ['TIR', pct(resumen.tir)],
+      ['TIR', pctNormalized(resumen.tir)],
       ['Fecha finalización', resumen.fechaFinalizacion || '-'],
     ];
 
