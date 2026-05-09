@@ -29,11 +29,17 @@ const buildErrorMessage = (status: number, payload: unknown, fallback: string): 
   return `${fallback} (HTTP ${status})`;
 };
 
-const safeJson = async (response: Response): Promise<unknown> => {
+const safePayload = async (response: Response): Promise<unknown> => {
   try {
     return await response.json();
   } catch {
-    return null;
+    try {
+      const text = await response.text();
+      if (!text) return null;
+      return { message: text };
+    } catch {
+      return null;
+    }
   }
 };
 
@@ -46,7 +52,7 @@ async function postAuth(path: string, body: Record<string, unknown>, fallbackErr
       body: JSON.stringify(body),
     });
 
-    const payload = await safeJson(response);
+    const payload = await safePayload(response);
     if (!response.ok) {
       return { ok: false, message: buildErrorMessage(response.status, payload, fallbackError) };
     }
@@ -75,11 +81,25 @@ export async function register(dni: string, email: string, username: string, pas
     return { ok: false, message: 'Ingresa un gmail valido para crear la cuenta.' };
   }
 
-  return postAuth(
+  const primary = await postAuth(
     '/api/v1/auth/register',
     { dni: dniValue, username: user, email: mail, password },
     'No se pudo crear la cuenta.'
   );
+  if (primary.ok) return primary;
+
+  // Compatibilidad: algunos backends no aceptan "dni" en register.
+  if ((primary.message ?? '').includes('HTTP 400')) {
+    const fallback = await postAuth(
+      '/api/v1/auth/register',
+      { username: user, email: mail, password },
+      'No se pudo crear la cuenta.'
+    );
+    if (fallback.ok) return fallback;
+    return fallback;
+  }
+
+  return primary;
 }
 
 export async function login(username: string, password: string): Promise<AuthResult> {
