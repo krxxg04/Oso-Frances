@@ -68,13 +68,19 @@ async function postAuth(path: string, body: Record<string, unknown>, fallbackErr
   }
 }
 
-export async function register(dni: string, email: string, username: string, password: string): Promise<AuthResult> {
+export async function register(
+  dni: string,
+  gmail: string,
+  username: string,
+  password: string,
+  repeatPassword: string
+): Promise<AuthResult> {
   const dniValue = dni.trim();
   const user = username.trim();
-  const mail = email.trim().toLowerCase();
+  const mail = gmail.trim().toLowerCase();
 
-  if (!dniValue || !user || !mail || !password) {
-    return { ok: false, message: 'DNI, usuario, gmail y contrasena son obligatorios.' };
+  if (!dniValue || !user || !mail || !password || !repeatPassword) {
+    return { ok: false, message: 'DNI, usuario, gmail, contrasena y repetir contrasena son obligatorios.' };
   }
 
   if (!/^\d{8}$/.test(dniValue)) {
@@ -87,7 +93,7 @@ export async function register(dni: string, email: string, username: string, pas
 
   return postAuth(
     '/api/v1/auth/register',
-    { dni: dniValue, username: user, email: mail, password },
+    { dni: dniValue, username: user, gmail: mail, password, repeatPassword },
     'No se pudo crear la cuenta.'
   );
 }

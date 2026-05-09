@@ -71,7 +71,8 @@ export default function initLogin(): void {
       registerDniEl.value,
       registerEmailEl.value,
       registerUsernameEl.value,
-      password
+      password,
+      passwordConfirm
     );
     if (!result.ok) {
       registerErrorEl.textContent = result.message ?? 'No se pudo crear la cuenta.';
