@@ -1,8 +1,10 @@
-import { authenticate, ensureDefaultUsers, setSession } from './auth';
+﻿import { hasActiveSession, login, register } from './auth';
+
+const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
 
 const getRequiredEl = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);
-  if (!element) throw new Error(`No se encontró el elemento #${id}`);
+  if (!element) throw new Error(`No se encontro el elemento #${id}`);
   return element as T;
 };
 
@@ -15,30 +17,108 @@ const setHidden = (el: HTMLElement, hidden: boolean) => {
 };
 
 export default function initLogin(): void {
-  ensureDefaultUsers();
+  const loginForm = getRequiredEl<HTMLFormElement>('login-form');
+  const registerForm = getRequiredEl<HTMLFormElement>('register-form');
+  const loginSubtitle = getRequiredEl<HTMLParagraphElement>('login-subtitle');
+  const goRegisterBtn = getRequiredEl<HTMLButtonElement>('go-register');
+  const goLoginBtn = getRequiredEl<HTMLButtonElement>('go-login');
+  const loginUsernameEl = getRequiredEl<HTMLInputElement>('login-username');
+  const loginPasswordEl = getRequiredEl<HTMLInputElement>('login-password');
+  const registerDniEl = getRequiredEl<HTMLInputElement>('register-dni');
+  const registerUsernameEl = getRequiredEl<HTMLInputElement>('register-username');
+  const registerEmailEl = getRequiredEl<HTMLInputElement>('register-email');
+  const registerPasswordEl = getRequiredEl<HTMLInputElement>('register-password');
+  const registerPasswordConfirmEl = getRequiredEl<HTMLInputElement>('register-password-confirm');
+  const loginErrorEl = getRequiredEl<HTMLParagraphElement>('login-error');
+  const registerErrorEl = getRequiredEl<HTMLParagraphElement>('register-error');
+  const registerSuccessEl = getRequiredEl<HTMLParagraphElement>('register-success');
 
-  const form = getRequiredEl<HTMLFormElement>('login-form');
-  const usernameEl = getRequiredEl<HTMLInputElement>('username');
-  const passwordEl = getRequiredEl<HTMLInputElement>('password');
-  const errorEl = getRequiredEl<HTMLParagraphElement>('login-error');
+  setHidden(loginErrorEl, true);
+  setHidden(registerErrorEl, true);
+  setHidden(registerSuccessEl, true);
 
-  setHidden(errorEl, true);
+  const showLogin = () => {
+    setHidden(registerForm, true);
+    setHidden(loginForm, false);
+    loginSubtitle.textContent = 'Inicia sesion para continuar con el simulador.';
+    setHidden(registerErrorEl, true);
+    setHidden(registerSuccessEl, true);
+  };
 
-  form.addEventListener('submit', (event) => {
+  const showRegister = () => {
+    setHidden(loginForm, true);
+    setHidden(registerForm, false);
+    loginSubtitle.textContent = 'Crea tu cuenta para acceder al simulador.';
+    setHidden(loginErrorEl, true);
+  };
+
+  goRegisterBtn.addEventListener('click', showRegister);
+  goLoginBtn.addEventListener('click', showLogin);
+
+  void hasActiveSession().then((active) => {
+    if (active) {
+      localStorage.setItem(AUTH_FLAG_KEY, '1');
+      window.location.assign('/');
+    }
+  });
+
+  loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!form.reportValidity()) return;
+    if (!loginForm.reportValidity()) return;
 
-    const username = usernameEl.value.trim();
-    const password = passwordEl.value;
+    setHidden(loginErrorEl, true);
+    const result = await login(loginUsernameEl.value, loginPasswordEl.value);
 
-    const ok = authenticate(username, password);
-    if (!ok) {
-      errorEl.textContent = 'Credenciales inválidas. Revisa usuario y contraseña.';
-      setHidden(errorEl, false);
+    if (!result.ok) {
+      loginErrorEl.textContent = result.message ?? 'No se pudo iniciar sesion.';
+      setHidden(loginErrorEl, false);
       return;
     }
 
-    setSession(username);
+    localStorage.setItem(AUTH_FLAG_KEY, '1');
+    window.location.assign('/');
+  });
+
+  registerForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!registerForm.reportValidity()) return;
+
+    setHidden(registerErrorEl, true);
+    setHidden(registerSuccessEl, true);
+
+    const password = registerPasswordEl.value;
+    const passwordConfirm = registerPasswordConfirmEl.value;
+    if (password !== passwordConfirm) {
+      registerErrorEl.textContent = 'Las contrasenas no coinciden.';
+      setHidden(registerErrorEl, false);
+      return;
+    }
+
+    const result = await register(
+      registerDniEl.value,
+      registerEmailEl.value,
+      registerUsernameEl.value,
+      password,
+      passwordConfirm
+    );
+
+    if (!result.ok) {
+      registerErrorEl.textContent = result.message ?? 'No se pudo crear la cuenta.';
+      setHidden(registerErrorEl, false);
+      return;
+    }
+
+    const loginAfterRegister = await login(registerUsernameEl.value, password);
+    if (!loginAfterRegister.ok) {
+      registerSuccessEl.textContent = 'Cuenta creada. Ahora inicia sesion.';
+      setHidden(registerSuccessEl, false);
+      registerForm.reset();
+      showLogin();
+      return;
+    }
+
+    localStorage.setItem(AUTH_FLAG_KEY, '1');
     window.location.assign('/');
   });
 }
+

@@ -1,15 +1,40 @@
----
+﻿---
 import Layout from '../layouts/Layout.astro';
 import SimuladorCredito from '../components/SimuladorCredito.astro';
 ---
 
-<Layout title="Crédito Vehicular">
-  <main>
+<Layout title="Credito Vehicular">
+  <main id="app-main" class="hidden">
     <SimuladorCredito />
   </main>
 </Layout>
 
 <script>
-  import { requireAuthOrRedirect } from '../scripts/auth';
-  requireAuthOrRedirect();
+  import { hasActiveSession } from '../scripts/auth';
+
+  const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
+  const main = document.getElementById('app-main');
+
+  const showApp = () => {
+    if (main) main.classList.remove('hidden');
+  };
+
+  const goLogin = () => {
+    window.location.replace('/login');
+  };
+
+  if (localStorage.getItem(AUTH_FLAG_KEY) === '1') {
+    showApp();
+  } else {
+    void hasActiveSession().then((ok) => {
+      if (ok) {
+        localStorage.setItem(AUTH_FLAG_KEY, '1');
+        showApp();
+        return;
+      }
+
+      goLogin();
+    });
+  }
 </script>
+

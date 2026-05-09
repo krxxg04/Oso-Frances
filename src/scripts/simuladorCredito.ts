@@ -1,18 +1,18 @@
-import {
+﻿import {
   calcularTIR,
   calcularVAN,
   generarCronograma,
   tasaEfectivaMensualDesdeTN,
   type Pago,
 } from '../utils/finance';
-
-import { guardarSimulacion, type SimulacionInput, type SimulacionResult } from '../utils/db';
+import { API_BASE_URL } from './api';
 
 type TipoGracia = 'total' | 'parcial';
 
+
 const getRequiredEl = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);
-  if (!element) throw new Error(`No se encontró el elemento #${id}`);
+  if (!element) throw new Error(`No se encontro el elemento #${id}`);
   return element as T;
 };
 
@@ -89,8 +89,6 @@ export default function initSimuladorCredito(): void {
 
     renderCronograma(cronogramaBodyEl, cronograma);
 
-    // Flujos del préstamo (perspectiva del banco):
-    // t=0: desembolso (negativo), t=1..n: cobros de cuotas (positivos)
     const flujos = [-capital, ...cronograma.map((pago) => pago.cuota)];
 
     const tasaPeriodo = tasaEfectivaMensualDesdeTN(tasaNominal, frecuenciaCapitalizacion);
@@ -102,11 +100,10 @@ export default function initSimuladorCredito(): void {
     if (Number.isFinite(tir)) {
       tirEl.textContent = `${(tir * 100).toFixed(4)}%`;
     } else {
-      tirEl.textContent = '—';
+      tirEl.textContent = '-';
     }
 
-    // Persistencia (IndexedDB)
-    const input: SimulacionInput = {
+    const payload = {
       nombreCliente,
       precioVehiculo,
       porcentajeCuotaInicial: cuotaInicial,
@@ -115,19 +112,24 @@ export default function initSimuladorCredito(): void {
       capitalizacionPorAnio: frecuenciaCapitalizacion,
       periodosGracia: gracia,
       tipoGracia,
-    };
-
-    const result: SimulacionResult = {
-      tasaPeriodo,
-      van,
-      tir,
-      cronograma,
+      result: {
+        tasaPeriodo,
+        van,
+        tir,
+        cronograma,
+      },
     };
 
     try {
-      await guardarSimulacion(input, result);
+      await fetch(`${API_BASE_URL}/api/v1/simulaciones`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
     } catch (error) {
-      console.warn('No se pudo guardar la simulación en IndexedDB:', error);
+      console.warn('No se pudo guardar la simulacion en el backend:', error);
     }
   });
 }
+

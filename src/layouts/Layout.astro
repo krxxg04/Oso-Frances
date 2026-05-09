@@ -23,12 +23,20 @@ const { title } = Astro.props;
 								<p class="nav-subtitle">Crédito vehicular premium</p>
 							</div>
 						</div>
-						<span class="nav-pill">Banca privada</span>
+						<div class="nav-actions">
+							<span class="nav-pill">Banca privada</span>
+							<a id="nav-login-link" href="/login" class="nav-link">Iniciar sesion</a>
+							<button id="nav-logout-btn" type="button" class="nav-link hidden">Cerrar sesion</button>
+						</div>
 					</div>
 				</header>
 				<div class="app-content">
 					<slot />
 				</div>
 			</div>
+			<script>
+				import initNavAuth from '../scripts/navAuth';
+				initNavAuth();
+			</script>
 		</body>
 	</html>

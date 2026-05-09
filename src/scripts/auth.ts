@@ -1,69 +1,130 @@
-export type StoredUser = {
-  username: string;
-  password: string;
+﻿import { API_BASE_URL, NETWORK_ERROR_MESSAGE, diagnoseBackendConnection } from './api';
+
+type ApiErrorPayload = {
+  detail?: string | Array<{ msg?: string } | string>;
+  message?: string;
+  error?: string;
 };
 
-const USERS_KEY = 'oso_frances_users_v1';
-const SESSION_KEY = 'oso_frances_session_user_v1';
+type AuthResult = {
+  ok: boolean;
+  message?: string;
+};
 
-const isBrowser = (): boolean => typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+const isBrowser = (): boolean => typeof window !== 'undefined';
 
-const safeJsonParse = <T>(value: string | null): T | null => {
-  if (!value) return null;
+const buildErrorMessage = (status: number, payload: unknown, fallback: string): string => {
+  const data = payload as ApiErrorPayload | null;
+
+  if (Array.isArray(data?.detail)) {
+    const first = data.detail[0];
+    if (typeof first === 'string') return first;
+    if (first?.msg) return first.msg;
+  }
+
+  if (data?.detail && typeof data.detail === 'string') return data.detail;
+  if (data?.message && typeof data.message === 'string') return data.message;
+  if (data?.error && typeof data.error === 'string') return data.error;
+
+  if (payload && typeof payload === 'object') {
+    return `${fallback} (HTTP ${status}) - ${JSON.stringify(payload)}`;
+  }
+
+  return `${fallback} (HTTP ${status})`;
+};
+
+const safePayload = async (response: Response): Promise<unknown> => {
   try {
-    return JSON.parse(value) as T;
+    return await response.json();
   } catch {
-    return null;
+    try {
+      const text = await response.text();
+      if (!text) return null;
+      return { message: text };
+    } catch {
+      return null;
+    }
   }
 };
 
-export function ensureDefaultUsers(): void {
+async function postAuth(path: string, body: Record<string, unknown>, fallbackError: string): Promise<AuthResult> {
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    });
+
+    const payload = await safePayload(response);
+    if (!response.ok) {
+      return { ok: false, message: buildErrorMessage(response.status, payload, fallbackError) };
+    }
+
+    return { ok: true };
+  } catch {
+    const diagnosis = await diagnoseBackendConnection();
+    return { ok: false, message: `${NETWORK_ERROR_MESSAGE} ${diagnosis}` };
+  }
+}
+
+export async function register(
+  dni: string,
+  gmail: string,
+  username: string,
+  password: string,
+  repeatPassword: string
+): Promise<AuthResult> {
+  const dniValue = dni.trim();
+  const user = username.trim();
+  const mail = gmail.trim().toLowerCase();
+
+  if (!dniValue || !user || !mail || !password || !repeatPassword) {
+    return { ok: false, message: 'DNI, usuario, gmail, contrasena y repetir contrasena son obligatorios.' };
+  }
+
+  if (!/^\d{8}$/.test(dniValue)) {
+    return { ok: false, message: 'El DNI debe tener 8 digitos.' };
+  }
+
+  if (!mail.includes('@')) {
+    return { ok: false, message: 'Ingresa un gmail valido para crear la cuenta.' };
+  }
+
+  return postAuth(
+    '/api/v1/auth/register',
+    { dni: dniValue, username: user, gmail: mail, password, repeatPassword },
+    'No se pudo crear la cuenta.'
+  );
+}
+
+export async function login(username: string, password: string): Promise<AuthResult> {
+  const user = username.trim();
+  if (!user || !password) return { ok: false, message: 'Usuario y contrasena son obligatorios.' };
+  return postAuth('/api/v1/auth/login', { username: user, password }, 'Credenciales invalidas.');
+}
+
+export async function logout(): Promise<AuthResult> {
+  return postAuth('/api/v1/auth/logout', {}, 'No se pudo cerrar sesion.');
+}
+
+export async function hasActiveSession(): Promise<boolean> {
+  if (!isBrowser()) return false;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/session`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function requireAuthOrRedirect(redirectPath = '/login'): Promise<void> {
   if (!isBrowser()) return;
 
-  const existing = safeJsonParse<StoredUser[]>(localStorage.getItem(USERS_KEY));
-  if (Array.isArray(existing) && existing.length > 0) return;
-
-  const seed: StoredUser[] = [
-    { username: 'admin', password: 'admin' },
-    { username: 'user', password: 'user' },
-  ];
-  localStorage.setItem(USERS_KEY, JSON.stringify(seed));
-}
-
-export function getUsers(): StoredUser[] {
-  if (!isBrowser()) return [];
-  const users = safeJsonParse<StoredUser[]>(localStorage.getItem(USERS_KEY));
-  return Array.isArray(users) ? users : [];
-}
-
-export function authenticate(username: string, password: string): boolean {
-  const u = username.trim();
-  if (!u) return false;
-
-  const users = getUsers();
-  return users.some((user) => user.username === u && user.password === password);
-}
-
-export function setSession(username: string): void {
-  if (!isBrowser()) return;
-  localStorage.setItem(SESSION_KEY, username);
-}
-
-export function getSessionUser(): string | null {
-  if (!isBrowser()) return null;
-  const username = localStorage.getItem(SESSION_KEY);
-  return username && username.trim() ? username : null;
-}
-
-export function clearSession(): void {
-  if (!isBrowser()) return;
-  localStorage.removeItem(SESSION_KEY);
-}
-
-export function requireAuthOrRedirect(redirectPath = '/login'): void {
-  if (!isBrowser()) return;
-  ensureDefaultUsers();
-
-  const user = getSessionUser();
-  if (!user) window.location.assign(redirectPath);
+  const hasSession = await hasActiveSession();
+  if (!hasSession) window.location.assign(redirectPath);
 }
