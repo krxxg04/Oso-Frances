@@ -341,8 +341,34 @@ body::-webkit-scrollbar-thumb {
 	overflow-x: auto;
 }
 
+.table-scroll-y {
+	max-height: 520px;
+	overflow-y: auto;
+}
+
 .results-table-card {
 	margin-top: 16px;
+}
+
+.bank-info {
+	margin-top: 12px;
+	margin-bottom: 12px;
+	padding: 12px 14px;
+	border-radius: var(--radius-md);
+	border: 1px solid #2c2c2e;
+	background: #1c1c1e;
+}
+
+.bank-info .card-subtitle {
+	margin: 0;
+	font-size: 0.84rem;
+	line-height: 1.35;
+}
+
+.cronograma-head {
+	padding: 14px 16px 10px;
+	margin-bottom: 0;
+	border-bottom: 1px solid #2c2c2e;
 }
 
 .results-table {

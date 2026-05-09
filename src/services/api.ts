@@ -85,33 +85,39 @@ export type SimulationResult = {
     tasaEfectivaAnual: number;
   };
   tasaPeriodo?: number;
-  resumen?: {
-    montoFinanciado: number;
-    cuotaInicial: number;
-    cuotaMensual: number;
-    cuotaFinalBalloon: number;
-    totalIntereses: number;
-    totalSeguros: number;
-    totalPagado: number;
-    tcea: number;
-    van: number;
-    tir: number;
-    fechaFinalizacion: string;
+  result?: {
+    tasa?: {
+      tasaEfectivaAnual: number;
+    };
+    tasaPeriodo?: number;
+    resumen?: {
+      montoFinanciado: number;
+      cuotaInicial: number;
+      cuotaMensual: number;
+      cuotaFinalBalloon: number;
+      totalIntereses: number;
+      totalSeguros: number;
+      totalPagado: number;
+      tcea: number;
+      van: number;
+      tir: number;
+      fechaFinalizacion: string;
+    };
+    cronograma?: Array<{
+      mes: number;
+      fecha: string;
+      saldoInicial: number;
+      cuota: number;
+      cuotaCapitalInteres: number;
+      interes: number;
+      seguroVehicular: number;
+      seguroDesgravamen: number;
+      seguro: number;
+      amortizacion: number;
+      saldoFinal: number;
+      tipoGracia: string;
+    }>;
   };
-  cronograma?: Array<{
-    mes: number;
-    fecha: string;
-    saldoInicial: number;
-    cuota: number;
-    cuotaCapitalInteres: number;
-    interes: number;
-    seguroVehicular: number;
-    seguroDesgravamen: number;
-    seguro: number;
-    amortizacion: number;
-    saldoFinal: number;
-    tipoGracia: string;
-  }>;
 };
 
 const buildErrorMessage = (status: number, payload: unknown, fallback: string): string => {

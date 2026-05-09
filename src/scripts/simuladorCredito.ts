@@ -26,6 +26,11 @@ const money = (value: number, currency: string): string =>
   }).format(Number.isFinite(value) ? value : 0);
 
 const pct = (value: number): string => `${(Number(value) || 0).toFixed(4)}%`;
+const pctNormalized = (value: number): string => {
+  const n = Number(value) || 0;
+  const percent = Math.abs(n) <= 1 ? n * 100 : n;
+  return `${percent.toFixed(4)}%`;
+};
 
 const toNumber = (input: HTMLInputElement): number => {
   const value = Number(input.value);
@@ -41,6 +46,7 @@ export default function initSimuladorCredito(): void {
   const form = getRequiredEl<HTMLFormElement>('simulador-form');
   const errorEl = getRequiredEl<HTMLParagraphElement>('simulador-error');
   const okEl = getRequiredEl<HTMLParagraphElement>('simulador-ok');
+  const btnCalcularEl = getRequiredEl<HTMLButtonElement>('btn-calcular');
 
   const vehiculoIdEl = getRequiredEl<HTMLSelectElement>('vehiculoId');
   const marcaEl = getRequiredEl<HTMLInputElement>('marca');
@@ -71,11 +77,14 @@ export default function initSimuladorCredito(): void {
   const bancoResultCardEl = getRequiredEl<HTMLDivElement>('banco-result-card');
   const bancoResultadoEl = getRequiredEl<HTMLParagraphElement>('banco-resultado');
   const cronogramaBodyEl = getRequiredEl<HTMLTableSectionElement>('cronograma-body');
+  const cronogramaScrollEl = getRequiredEl<HTMLDivElement>('cronograma-scroll');
+  const toggleCronogramaEl = getRequiredEl<HTMLButtonElement>('toggle-cronograma');
+  const cronogramaHintEl = getRequiredEl<HTMLParagraphElement>('cronograma-hint');
 
   const historialFormEl = getRequiredEl<HTMLFormElement>('historial-filtros');
   const historialBodyEl = getRequiredEl<HTMLTableSectionElement>('historial-body');
   const fMonedaEl = getRequiredEl<HTMLInputElement>('f-moneda');
-  const fPlazoEl = getRequiredEl<HTMLInputElement>('f-plazo');
+  const fPlazoEl = getRequiredEl<HTMLSelectElement>('f-plazo');
   const fVehiculoEl = getRequiredEl<HTMLInputElement>('f-vehiculo');
   const fMontoMinEl = getRequiredEl<HTMLInputElement>('f-monto-min');
   const fMontoMaxEl = getRequiredEl<HTMLInputElement>('f-monto-max');
@@ -84,6 +93,28 @@ export default function initSimuladorCredito(): void {
 
   let bancos: Banco[] = [];
   let vehiculos: Vehiculo[] = [];
+
+  const normalizeSimulation = (raw: unknown): SimulationResult => {
+    const data = raw as Record<string, unknown> | null;
+    if (!data) return {} as SimulationResult;
+    if (data.item && typeof data.item === 'object') return data.item as SimulationResult;
+    if (data.simulacion && typeof data.simulacion === 'object') return data.simulacion as SimulationResult;
+    return data as SimulationResult;
+  };
+
+  const pickBancoFromSimulation = (sim: SimulationResult): string => {
+    if (sim.banco?.nombre) return sim.banco.nombre;
+
+    const resultObj = sim.result as Record<string, unknown> | undefined;
+    const bancoObj = resultObj?.banco as Record<string, unknown> | undefined;
+    if (typeof bancoObj?.nombre === 'string' && bancoObj.nombre) return bancoObj.nombre;
+
+    const inputObj = (sim as unknown as { input?: Record<string, unknown> }).input;
+    if (typeof inputObj?.bancoNombre === 'string' && inputObj.bancoNombre) return inputObj.bancoNombre;
+    if (typeof inputObj?.bancoId === 'string' && inputObj.bancoId) return inputObj.bancoId;
+
+    return '-';
+  };
 
   const renderPlazos = (plazos: number[]) => {
     const unique = [...new Set(plazos)].sort((a, b) => a - b);
@@ -132,21 +163,29 @@ export default function initSimuladorCredito(): void {
       periodosGraciaEl.value = String(bank.periodosGraciaMax);
     }
 
-    renderPlazos(bank.plazosMeses || []);
+    const plazosBanco = bank.plazosMeses || [];
+    renderPlazos(plazosBanco);
+    if (!plazosBanco.includes(Number(plazoMesesEl.value)) && plazosBanco.length > 0) {
+      plazoMesesEl.value = String(plazosBanco[0]);
+    }
   };
 
   const getSelectedBank = (): Banco | null => bancos.find((item) => item.id === bancoIdEl.value) ?? null;
 
   const renderResumen = (result: SimulationResult, currency: string) => {
-    const resumen = result.resumen;
+    const resumen = result.result?.resumen;
     if (!resumen) {
       resumenGridEl.innerHTML = '';
       return;
     }
 
+    const tasaEfectivaAnualValue =
+      result.result?.tasa?.tasaEfectivaAnual ?? result.tasa?.tasaEfectivaAnual ?? 0;
+    const tasaPeriodoValue = result.result?.tasaPeriodo ?? result.tasaPeriodo ?? 0;
+
     const items: Array<[string, string]> = [
-      ['TEA', pct(result.tasa?.tasaEfectivaAnual ?? 0)],
-      ['Tasa periodo', pct(result.tasaPeriodo ?? 0)],
+      ['TEA', pctNormalized(tasaEfectivaAnualValue)],
+      ['Tasa periodo', pctNormalized(tasaPeriodoValue)],
       ['Monto financiado', money(resumen.montoFinanciado, currency)],
       ['Cuota inicial', money(resumen.cuotaInicial, currency)],
       ['Cuota mensual', money(resumen.cuotaMensual, currency)],
@@ -154,9 +193,9 @@ export default function initSimuladorCredito(): void {
       ['Total intereses', money(resumen.totalIntereses, currency)],
       ['Total seguros', money(resumen.totalSeguros, currency)],
       ['Total pagado', money(resumen.totalPagado, currency)],
-      ['TCEA', pct(resumen.tcea)],
+      ['TCEA', pctNormalized(resumen.tcea)],
       ['VAN', money(resumen.van, currency)],
-      ['TIR', pct(resumen.tir)],
+      ['TIR', pctNormalized(resumen.tir)],
       ['Fecha finalización', resumen.fechaFinalizacion || '-'],
     ];
 
@@ -184,7 +223,7 @@ export default function initSimuladorCredito(): void {
   };
 
   const renderCronograma = (result: SimulationResult, currency: string) => {
-    const cronograma = result.cronograma || [];
+    const cronograma = result.result?.cronograma || [];
     cronogramaBodyEl.innerHTML = cronograma
       .map(
         (row) => `
@@ -214,16 +253,17 @@ export default function initSimuladorCredito(): void {
     }
 
     historialBodyEl.innerHTML = items
-      .map((item) => {
+      .map((rawItem) => {
+        const item = normalizeSimulation(rawItem);
         const id = item.id || '';
-        const tcea = item.resumen?.tcea ?? 0;
-        const totalPagado = item.resumen?.totalPagado ?? 0;
-        const banco = item.banco?.nombre || '-';
+        const tcea = item.result?.resumen?.tcea ?? 0;
+        const totalPagado = item.result?.resumen?.totalPagado ?? 0;
+        const banco = pickBancoFromSimulation(item);
         return `
           <tr>
             <td>${id || '-'}</td>
             <td>${banco}</td>
-            <td>${pct(tcea)}</td>
+            <td>${pctNormalized(tcea)}</td>
             <td>${money(totalPagado, 'PEN')}</td>
             <td><button type="button" class="nav-link" data-open-sim="${id}">Abrir</button></td>
           </tr>
@@ -245,7 +285,8 @@ export default function initSimuladorCredito(): void {
 
     try {
       const data = await getSimulations(filters);
-      renderHistory(data.items || []);
+      const items = (data.items || []).map((item) => normalizeSimulation(item));
+      renderHistory(items);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo cargar historial.';
       if (message.includes('HTTP 401')) {
@@ -284,14 +325,52 @@ export default function initSimuladorCredito(): void {
     moneda: monedaEl.value,
   });
 
+  const validateSimulationInputs = (): string | null => {
+    if (!marcaEl.value.trim()) return 'Ingresa la marca del vehículo.';
+    if (!modeloEl.value.trim()) return 'Ingresa el modelo del vehículo.';
+    if (!Number.isFinite(toNumber(anioEl)) || toNumber(anioEl) < 2000) return 'Ingresa un año válido (>= 2000).';
+    if (!tipoEl.value.trim()) return 'Ingresa el tipo de vehículo.';
+    if (!Number.isFinite(toNumber(precioVehiculoEl)) || toNumber(precioVehiculoEl) <= 0)
+      return 'Ingresa un precio de vehículo mayor a 0.';
+    if (!Number.isFinite(toNumber(porcentajeCuotaInicialEl)) || toNumber(porcentajeCuotaInicialEl) < 0)
+      return 'Ingresa una cuota inicial válida.';
+    if (!Number.isFinite(toNumber(tasaEfectivaAnualEl)) || toNumber(tasaEfectivaAnualEl) <= 0)
+      return 'Ingresa una Tasa Efectiva Anual (TEA) mayor a 0.';
+    if (toNumber(tasaEfectivaAnualEl) > 100) return 'La TEA debe estar entre 0 y 100.';
+    if (!bancoIdEl.value) {
+      const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
+      if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual válido.';
+      if (seguroDesgravamen < 0 || seguroDesgravamen > 100)
+        return 'El seguro de desgravamen anual debe estar entre 0 y 100.';
+    }
+    if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
+    return null;
+  };
+
   const openSimulationById = async (id: string) => {
     if (!id) return;
-    const detail = await getSimulationById(id);
-    renderResumen(detail, monedaEl.value || 'PEN');
+    const rawDetail = await getSimulationById(id);
+    const detail = normalizeSimulation(rawDetail);
+    const detailCurrency =
+      ((detail as unknown as { input?: { moneda?: string } }).input?.moneda as string | undefined) ||
+      monedaEl.value ||
+      'PEN';
+    renderResumen(detail, detailCurrency);
     renderBancoResult(detail);
-    renderCronograma(detail, monedaEl.value || 'PEN');
+    renderCronograma(detail, detailCurrency);
+    cronogramaScrollEl.classList.remove('hidden');
+    toggleCronogramaEl.textContent = 'Ocultar';
+    document.getElementById('resumen-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMessage(okEl, `Simulación ${id} cargada`, false);
   };
+
+  toggleCronogramaEl.addEventListener('click', () => {
+    const isHidden = cronogramaScrollEl.classList.toggle('hidden');
+    toggleCronogramaEl.textContent = isHidden ? 'Mostrar' : 'Ocultar';
+    cronogramaHintEl.textContent = isHidden
+      ? 'Cronograma oculto. Presiona "Mostrar" para verlo.'
+      : 'Visualiza el detalle mes a mes.';
+  });
 
   bancoIdEl.addEventListener('change', () => {
     const bank = getSelectedBank();
@@ -338,7 +417,12 @@ export default function initSimuladorCredito(): void {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!form.reportValidity()) return;
+    const validationError = validateSimulationInputs();
+    if (validationError) {
+      setMessage(errorEl, validationError, false);
+      setMessage(okEl, '', true);
+      return;
+    }
 
     setMessage(errorEl, '', true);
     setMessage(okEl, '', true);
@@ -355,6 +439,9 @@ export default function initSimuladorCredito(): void {
       setMessage(errorEl, 'Si el tipo de gracia es parcial o total, periodosGracia debe ser mayor a 0.', false);
       return;
     }
+
+    btnCalcularEl.disabled = true;
+    btnCalcularEl.textContent = 'Simulando...';
 
     const payload: SimulationCreatePayload = {
       moneda: monedaEl.value,
@@ -382,13 +469,30 @@ export default function initSimuladorCredito(): void {
 
     try {
       const result = await createSimulation(payload);
+      const hasResumen = !!result.result?.resumen;
+      const hasCronograma = (result.result?.cronograma ?? []).length > 0;
       renderResumen(result, payload.moneda);
       renderBancoResult(result);
       renderCronograma(result, payload.moneda);
+      cronogramaScrollEl.classList.remove('hidden');
+      toggleCronogramaEl.textContent = 'Ocultar';
+      cronogramaHintEl.textContent = 'Visualiza el detalle mes a mes.';
       await loadHistory();
+      if (!hasResumen && !hasCronograma) {
+        setMessage(
+          errorEl,
+          'La API respondio sin datos de simulacion. Verifica que /api/v1/simulaciones devuelva result.resumen y result.cronograma.',
+          false
+        );
+        return;
+      }
+
       setMessage(okEl, 'Simulación generada correctamente.', false);
     } catch (error) {
       setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo generar la simulación.', false);
+    } finally {
+      btnCalcularEl.disabled = false;
+      btnCalcularEl.textContent = 'Simular crédito';
     }
   });
 

@@ -14,7 +14,7 @@
   <p id="simulador-error" class="alert hidden"></p>
   <p id="simulador-ok" class="alert hidden"></p>
 
-  <form id="simulador-form" class="form-stack">
+  <form id="simulador-form" class="form-stack" novalidate>
     <section class="card">
       <div class="card-header">
         <div>
@@ -32,19 +32,19 @@
         </div>
         <div class="field">
           <label for="marca" class="field-label">Marca</label>
-          <input id="marca" name="marca" type="text" class="ios-input" required />
+          <input id="marca" name="marca" type="text" class="ios-input" />
         </div>
         <div class="field">
           <label for="modelo" class="field-label">Modelo</label>
-          <input id="modelo" name="modelo" type="text" class="ios-input" required />
+          <input id="modelo" name="modelo" type="text" class="ios-input" />
         </div>
         <div class="field">
           <label for="anio" class="field-label">Año</label>
-          <input id="anio" name="anio" type="number" min="2000" step="1" class="ios-input" required />
+          <input id="anio" name="anio" type="number" min="2000" step="1" class="ios-input" />
         </div>
         <div class="field">
           <label for="tipo" class="field-label">Tipo</label>
-          <input id="tipo" name="tipo" type="text" class="ios-input" value="sedan" required />
+          <input id="tipo" name="tipo" type="text" class="ios-input" value="sedan" />
         </div>
         <div class="field">
           <label for="precioVehiculo" class="field-label">Precio del vehículo</label>
@@ -129,7 +129,7 @@
         </div>
       </div>
 
-      <div id="banco-info" class="card hidden">
+      <div id="banco-info" class="bank-info hidden">
         <p class="card-subtitle" id="banco-info-text"></p>
       </div>
 
@@ -167,7 +167,14 @@
     </div>
 
     <div class="card table-card results-table-card">
-      <div class="table-scroll">
+      <div class="card-header cronograma-head">
+        <div>
+          <h3 class="card-title">Cronograma de pagos</h3>
+          <p id="cronograma-hint" class="card-subtitle">Visualiza el detalle mes a mes.</p>
+        </div>
+        <button type="button" id="toggle-cronograma" class="nav-link">Ocultar</button>
+      </div>
+      <div class="table-scroll table-scroll-y" id="cronograma-scroll">
         <table class="results-table">
           <thead>
             <tr>
@@ -201,7 +208,16 @@
 
     <form id="historial-filtros" class="form-grid">
       <input id="f-moneda" class="ios-input" placeholder="Moneda (PEN/USD)" />
-      <input id="f-plazo" class="ios-input" type="number" placeholder="Plazo meses" />
+      <select id="f-plazo" class="ios-input">
+        <option value="">Plazo meses</option>
+        <option value="12">12</option>
+        <option value="24">24</option>
+        <option value="36">36</option>
+        <option value="48">48</option>
+        <option value="60">60</option>
+        <option value="72">72</option>
+        <option value="84">84</option>
+      </select>
       <input id="f-vehiculo" class="ios-input" placeholder="Vehículo" />
       <input id="f-monto-min" class="ios-input" type="number" placeholder="Monto mínimo" />
       <input id="f-monto-max" class="ios-input" type="number" placeholder="Monto máximo" />
@@ -229,6 +245,31 @@
 
 <script>
   import initSimuladorCredito from '../scripts/simuladorCredito';
-  initSimuladorCredito();
+
+  const showInitError = (error: unknown) => {
+    const target = document.getElementById('simulador-error');
+    if (!target) {
+      console.error(error);
+      return;
+    }
+
+    const message = error instanceof Error ? error.message : 'No se pudo inicializar el simulador.';
+    target.textContent = message;
+    target.classList.remove('hidden');
+  };
+
+  const boot = () => {
+    try {
+      initSimuladorCredito();
+    } catch (error) {
+      showInitError(error);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 </script>
 
