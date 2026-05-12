@@ -29,6 +29,7 @@ body {
 	padding: 0;
 	width: 100%;
 	min-height: 100%;
+	overflow-x: hidden;
 }
 
 body {
@@ -99,7 +100,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .app-content {
-	width: min(1120px, 100%);
+	width: 100%;
+	max-width: 1120px;
 	margin: 0 auto;
 	padding: 32px 20px 80px;
 }
@@ -123,7 +125,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .nav-inner {
-	width: min(1120px, 100%);
+	width: 100%;
+	max-width: 1120px;
 	margin: 0 auto;
 	padding: 18px 20px;
 	display: flex;
@@ -338,7 +341,9 @@ body::-webkit-scrollbar-thumb {
 }
 
 .table-scroll {
+	max-width: 100%;
 	overflow-x: auto;
+	overscroll-behavior-x: contain;
 }
 
 .table-scroll-y {
@@ -372,7 +377,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .results-table {
-	width: 100%;
+	width: max-content;
+	min-width: 100%;
 	border-collapse: collapse;
 	font-size: 0.85rem;
 	color: #f2f2f7;
@@ -388,12 +394,14 @@ body::-webkit-scrollbar-thumb {
 	color: var(--plomo-2);
 	background: #2c2c2e;
 	padding: 12px 16px;
+	white-space: nowrap;
 }
 
 .results-table tbody td {
 	padding: 12px 16px;
 	border-top: 1px solid #2c2c2e;
 	transition: var(--transition);
+	white-space: nowrap;
 }
 
 .results-table tbody tr:nth-child(even) {
@@ -545,5 +553,96 @@ body::-webkit-scrollbar-thumb {
 
 	.card {
 		padding: 20px;
+	}
+}
+
+@media (max-width: 1024px) {
+	.app-content {
+		padding: 24px 16px 64px;
+	}
+
+	.form-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.stats-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.section-title {
+		font-size: 1.35rem;
+	}
+}
+
+@media (max-width: 768px) {
+	.app-content {
+		padding: 20px 14px 56px;
+	}
+
+	.card {
+		border-radius: 22px;
+		padding: 18px;
+	}
+
+	.form-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.stats-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.card-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.cronograma-head {
+		padding: 12px 14px 8px;
+	}
+
+	.results-table {
+		font-size: 0.8rem;
+	}
+
+	.results-table thead th,
+	.results-table tbody td {
+		padding: 10px 12px;
+	}
+
+	.nav-pill,
+	.nav-link,
+	.chip {
+		font-size: 0.68rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.section-title {
+		font-size: 1.2rem;
+	}
+
+	.section-subtitle {
+		font-size: 0.84rem;
+	}
+
+	.login-card {
+		padding: 24px 18px;
+		border-radius: 24px;
+	}
+
+	.btn-primary {
+		padding: 11px 14px;
+		font-size: 0.9rem;
+	}
+
+	.ios-input {
+		padding: 11px 12px;
+	}
+
+	.stat-value {
+		font-size: 1.2rem;
 	}
 }
