@@ -25,12 +25,7 @@ const money = (value: number, currency: string): string =>
     maximumFractionDigits: 2,
   }).format(Number.isFinite(value) ? value : 0);
 
-const pct = (value: number): string => `${(Number(value) || 0).toFixed(4)}%`;
-const pctNormalized = (value: number): string => {
-  const n = Number(value) || 0;
-  const percent = Math.abs(n) <= 1 ? n * 100 : n;
-  return `${percent.toFixed(4)}%`;
-};
+const pctFromDecimal = (value: number): string => `${((Number(value) || 0) * 100).toFixed(4)}%`;
 
 const toNumber = (input: HTMLInputElement): number => {
   const value = Number(input.value);
@@ -137,7 +132,7 @@ export default function initSimuladorCredito(): void {
     bancoInfoWrapEl.classList.remove('hidden');
     tasaEfectivaAnualEl.value = String(bank.tasaEfectivaAnual);
     seguroDesgravamenAnualEl.value = String(bank.seguroDesgravamenAnual);
-    bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · TEA ${pct(bank.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pct(bank.seguroDesgravamenMensual)}`;
+    bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · TEA ${pctFromDecimal(bank.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromDecimal(bank.seguroDesgravamenMensual)}`;
   };
 
   const applyBankConstraints = (bank: Banco | null) => {
@@ -184,8 +179,8 @@ export default function initSimuladorCredito(): void {
     const tasaPeriodoValue = result.result?.tasaPeriodo ?? result.tasaPeriodo ?? 0;
 
     const items: Array<[string, string]> = [
-      ['TEA', pctNormalized(tasaEfectivaAnualValue)],
-      ['Tasa periodo', pctNormalized(tasaPeriodoValue)],
+      ['TEA', pctFromDecimal(tasaEfectivaAnualValue)],
+      ['Tasa periodo', pctFromDecimal(tasaPeriodoValue)],
       ['Monto financiado', money(resumen.montoFinanciado, currency)],
       ['Cuota inicial', money(resumen.cuotaInicial, currency)],
       ['Cuota mensual', money(resumen.cuotaMensual, currency)],
@@ -193,9 +188,9 @@ export default function initSimuladorCredito(): void {
       ['Total intereses', money(resumen.totalIntereses, currency)],
       ['Total seguros', money(resumen.totalSeguros, currency)],
       ['Total pagado', money(resumen.totalPagado, currency)],
-      ['TCEA', pctNormalized(resumen.tcea)],
+      ['TCEA', pctFromDecimal(resumen.tcea)],
       ['VAN', money(resumen.van, currency)],
-      ['TIR', pctNormalized(resumen.tir)],
+      ['TIR', pctFromDecimal(resumen.tir)],
       ['Fecha finalización', resumen.fechaFinalizacion || '-'],
     ];
 
@@ -219,14 +214,18 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoResultCardEl.classList.remove('hidden');
-    bancoResultadoEl.textContent = `${result.banco.nombre} · ${result.banco.producto} · TEA ${pct(result.banco.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pct(result.banco.seguroDesgravamenMensual)} · Seguro desgravamen anual ${pct(result.banco.seguroDesgravamenAnual)}`;
+    bancoResultadoEl.textContent = `${result.banco.nombre} · ${result.banco.producto} · TEA ${pctFromDecimal(result.banco.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromDecimal(result.banco.seguroDesgravamenMensual)} · Seguro desgravamen anual ${pctFromDecimal(result.banco.seguroDesgravamenAnual)}`;
   };
 
   const renderCronograma = (result: SimulationResult, currency: string) => {
     const cronograma = result.result?.cronograma || [];
     cronogramaBodyEl.innerHTML = cronograma
       .map(
-        (row) => `
+        (row) => {
+          const seguroVehicular = row.seguroVehicular ?? 0;
+          const seguroDesgravamen = row.seguroDesgravamen ?? 0;
+          const seguroTotal = seguroVehicular + seguroDesgravamen;
+          return `
         <tr>
           <td>${row.mes ?? '-'}</td>
           <td>${row.fecha ?? '-'}</td>
@@ -234,14 +233,15 @@ export default function initSimuladorCredito(): void {
           <td>${money(row.cuota ?? 0, currency)}</td>
           <td>${money(row.cuotaCapitalInteres ?? 0, currency)}</td>
           <td>${money(row.interes ?? 0, currency)}</td>
-          <td>${money(row.seguroVehicular ?? 0, currency)}</td>
-          <td>${money(row.seguroDesgravamen ?? 0, currency)}</td>
-          <td>${money(row.seguro ?? 0, currency)}</td>
+          <td>${money(seguroVehicular, currency)}</td>
+          <td>${money(seguroDesgravamen, currency)}</td>
+          <td>${money(seguroTotal, currency)}</td>
           <td>${money(row.amortizacion ?? 0, currency)}</td>
           <td>${money(row.saldoFinal ?? 0, currency)}</td>
           <td>${row.tipoGracia ?? '-'}</td>
         </tr>
-      `
+      `;
+        }
       )
       .join('');
   };
@@ -263,7 +263,7 @@ export default function initSimuladorCredito(): void {
           <tr>
             <td>${id || '-'}</td>
             <td>${banco}</td>
-            <td>${pctNormalized(tcea)}</td>
+            <td>${pctFromDecimal(tcea)}</td>
             <td>${money(totalPagado, 'PEN')}</td>
             <td><button type="button" class="nav-link" data-open-sim="${id}">Abrir</button></td>
           </tr>
@@ -334,16 +334,27 @@ export default function initSimuladorCredito(): void {
       return 'Ingresa un precio de vehículo mayor a 0.';
     if (!Number.isFinite(toNumber(porcentajeCuotaInicialEl)) || toNumber(porcentajeCuotaInicialEl) < 0)
       return 'Ingresa una cuota inicial válida.';
-    if (!Number.isFinite(toNumber(tasaEfectivaAnualEl)) || toNumber(tasaEfectivaAnualEl) <= 0)
-      return 'Ingresa una Tasa Efectiva Anual (TEA) mayor a 0.';
-    if (toNumber(tasaEfectivaAnualEl) > 100) return 'La TEA debe estar entre 0 y 100.';
-    if (!bancoIdEl.value) {
+    const bank = getSelectedBank();
+    if (!bank) {
+      if (!Number.isFinite(toNumber(tasaEfectivaAnualEl)) || toNumber(tasaEfectivaAnualEl) <= 0)
+        return 'Ingresa una Tasa Efectiva Anual (TEA) mayor a 0.';
+      if (toNumber(tasaEfectivaAnualEl) > 100) return 'La TEA debe estar entre 0 y 100.';
       const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
       if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual válido.';
       if (seguroDesgravamen < 0 || seguroDesgravamen > 100)
         return 'El seguro de desgravamen anual debe estar entre 0 y 100.';
+    } else {
+      const cuotaInicial = toNumber(porcentajeCuotaInicialEl);
+      if (cuotaInicial < bank.porcentajeCuotaInicialMin || cuotaInicial > bank.porcentajeCuotaInicialMax) {
+        return `La cuota inicial para ${bank.nombre} debe estar entre ${bank.porcentajeCuotaInicialMin}% y ${bank.porcentajeCuotaInicialMax}%.`;
+      }
+      const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
+      if (periodosGracia > bank.periodosGraciaMax) {
+        return `El número de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
+      }
     }
     if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInicioEl.value)) return 'La fecha de inicio debe estar en formato YYYY-MM-DD.';
     return null;
   };
 
