@@ -25,7 +25,13 @@ const money = (value: number, currency: string): string =>
     maximumFractionDigits: 2,
   }).format(Number.isFinite(value) ? value : 0);
 
+const pctFromPercentage = (value: number): string => `${(Number(value) || 0).toFixed(4)}%`;
 const pctFromDecimal = (value: number): string => `${((Number(value) || 0) * 100).toFixed(4)}%`;
+const pctAutoRate = (value: number): string => {
+  const n = Number(value) || 0;
+  const percent = Math.abs(n) <= 1 ? n * 100 : n;
+  return `${percent.toFixed(4)}%`;
+};
 
 const toNumber = (input: HTMLInputElement): number => {
   const value = Number(input.value);
@@ -132,7 +138,7 @@ export default function initSimuladorCredito(): void {
     bancoInfoWrapEl.classList.remove('hidden');
     tasaEfectivaAnualEl.value = String(bank.tasaEfectivaAnual);
     seguroDesgravamenAnualEl.value = String(bank.seguroDesgravamenAnual);
-    bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · TEA ${pctFromDecimal(bank.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromDecimal(bank.seguroDesgravamenMensual)}`;
+    bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · TEA ${pctAutoRate(bank.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromPercentage(bank.seguroDesgravamenMensual)}`;
   };
 
   const applyBankConstraints = (bank: Banco | null) => {
@@ -179,8 +185,8 @@ export default function initSimuladorCredito(): void {
     const tasaPeriodoValue = result.result?.tasaPeriodo ?? result.tasaPeriodo ?? 0;
 
     const items: Array<[string, string]> = [
-      ['TEA', pctFromDecimal(tasaEfectivaAnualValue)],
-      ['Tasa periodo', pctFromDecimal(tasaPeriodoValue)],
+      ['TEA', pctAutoRate(tasaEfectivaAnualValue)],
+      ['Tasa periodo', pctAutoRate(tasaPeriodoValue)],
       ['Monto financiado', money(resumen.montoFinanciado, currency)],
       ['Cuota inicial', money(resumen.cuotaInicial, currency)],
       ['Cuota mensual', money(resumen.cuotaMensual, currency)],
@@ -214,18 +220,14 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoResultCardEl.classList.remove('hidden');
-    bancoResultadoEl.textContent = `${result.banco.nombre} · ${result.banco.producto} · TEA ${pctFromDecimal(result.banco.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromDecimal(result.banco.seguroDesgravamenMensual)} · Seguro desgravamen anual ${pctFromDecimal(result.banco.seguroDesgravamenAnual)}`;
+    bancoResultadoEl.textContent = `${result.banco.nombre} · ${result.banco.producto} · TEA ${pctAutoRate(result.banco.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromPercentage(result.banco.seguroDesgravamenMensual)} · Seguro desgravamen anual ${pctFromPercentage(result.banco.seguroDesgravamenAnual)}`;
   };
 
   const renderCronograma = (result: SimulationResult, currency: string) => {
     const cronograma = result.result?.cronograma || [];
     cronogramaBodyEl.innerHTML = cronograma
       .map(
-        (row) => {
-          const seguroVehicular = row.seguroVehicular ?? 0;
-          const seguroDesgravamen = row.seguroDesgravamen ?? 0;
-          const seguroTotal = seguroVehicular + seguroDesgravamen;
-          return `
+        (row) => `
         <tr>
           <td>${row.mes ?? '-'}</td>
           <td>${row.fecha ?? '-'}</td>
@@ -233,15 +235,14 @@ export default function initSimuladorCredito(): void {
           <td>${money(row.cuota ?? 0, currency)}</td>
           <td>${money(row.cuotaCapitalInteres ?? 0, currency)}</td>
           <td>${money(row.interes ?? 0, currency)}</td>
-          <td>${money(seguroVehicular, currency)}</td>
-          <td>${money(seguroDesgravamen, currency)}</td>
-          <td>${money(seguroTotal, currency)}</td>
+          <td>${money(row.seguroVehicular ?? 0, currency)}</td>
+          <td>${money(row.seguroDesgravamen ?? 0, currency)}</td>
+          <td>${money(row.seguro ?? 0, currency)}</td>
           <td>${money(row.amortizacion ?? 0, currency)}</td>
           <td>${money(row.saldoFinal ?? 0, currency)}</td>
           <td>${row.tipoGracia ?? '-'}</td>
         </tr>
-      `;
-        }
+      `
       )
       .join('');
   };
@@ -473,12 +474,12 @@ export default function initSimuladorCredito(): void {
     if (bank) {
       payload.bancoId = bank.id;
       payload.tasaEfectivaAnual = bank.tasaEfectivaAnual;
-      payload.seguroDesgravamenAnual = bank.seguroDesgravamenAnual;
     } else {
       payload.seguroDesgravamenAnual = toNumber(seguroDesgravamenAnualEl);
     }
 
     try {
+      console.log('[simulador] payload POST /api/v1/simulaciones', payload);
       const result = await createSimulation(payload);
       const hasResumen = !!result.result?.resumen;
       const hasCronograma = (result.result?.cronograma ?? []).length > 0;
