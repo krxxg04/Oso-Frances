@@ -25,6 +25,7 @@ export default function initLogin(): void {
   const loginUsernameEl = getRequiredEl<HTMLInputElement>('login-username');
   const loginPasswordEl = getRequiredEl<HTMLInputElement>('login-password');
   const registerDniEl = getRequiredEl<HTMLInputElement>('register-dni');
+  const registerFullNameEl = getRequiredEl<HTMLInputElement>('register-full-name');
   const registerUsernameEl = getRequiredEl<HTMLInputElement>('register-username');
   const registerEmailEl = getRequiredEl<HTMLInputElement>('register-email');
   const registerPasswordEl = getRequiredEl<HTMLInputElement>('register-password');
@@ -105,6 +106,7 @@ export default function initLogin(): void {
 
     const result = await register(
       registerDniEl.value,
+      registerFullNameEl.value,
       registerEmailEl.value,
       registerUsernameEl.value,
       password,

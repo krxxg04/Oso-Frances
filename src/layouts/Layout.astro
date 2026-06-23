@@ -9,7 +9,6 @@ const { title } = Astro.props;
 			<meta name="viewport" content="width=device-width" />
 			<link rel="icon" type="image/png" href="/Whiteosito.png" />
 			<link rel="apple-touch-icon" href="/Whiteosito.png" />
-			<meta name="generator" content={Astro.generator} />
 			<title>{title ? `${title} · El Oso Francés` : 'El Oso Francés'}</title>
 		</head>
 		<body class="app-body">
@@ -30,14 +29,11 @@ const { title } = Astro.props;
 						</div>
 					</div>
 				</header>
-				<div class="app-content">
-					<slot />
-				</div>
+			<div class="app-content">
+				<slot />
 			</div>
-			<script>
-				import initNavAuth from '../scripts/navAuth';
-				initNavAuth();
-			</script>
+		</div>
+			<script src="../scripts/bootstrapNav.ts"></script>
 		</body>
 	</html>
 

@@ -6,7 +6,7 @@
 type ApiErrorPayload = {
   detail?: string | Array<{ msg?: string } | string>;
   message?: string;
-  error?: string;
+  error?: string | { code?: string; message?: string; field?: string };
 };
 
 export type UserSession = {
@@ -21,6 +21,7 @@ export type ClienteProfile = {
   email: string;
   dni: string;
   fullName: string;
+  pictureUrl?: string;
   role: string;
 };
 
@@ -50,21 +51,23 @@ export type Vehiculo = {
 };
 
 export type TipoGracia = 'sin_gracia' | 'parcial' | 'total';
+export type TipoTasa = 'efectiva' | 'nominal';
 
 export type SimulationCreatePayload = {
   bancoId?: string;
   moneda: string;
   vehiculo: Vehiculo;
-  precioVehiculo: number;
   porcentajeCuotaInicial: number;
   plazoMeses: number;
-  tasaEfectivaAnual: number;
   periodosPorAnio: number;
   periodosGracia: number;
   tipoGracia: TipoGracia;
   cuotaFinalBalloon: number;
   seguroVehicularMensual: number;
   fechaInicio: string;
+  tipoTasa?: TipoTasa;
+  tasaAnual?: number;
+  frecuenciaCapitalizacion?: number;
   seguroDesgravamenAnual?: number;
 };
 
@@ -132,6 +135,7 @@ const buildErrorMessage = (status: number, payload: unknown, fallback: string): 
   if (typeof data?.detail === 'string') return data.detail;
   if (typeof data?.message === 'string') return data.message;
   if (typeof data?.error === 'string') return data.error;
+  if (typeof data?.error === 'object' && typeof data.error?.message === 'string') return data.error.message;
 
   return `${fallback} (HTTP ${status})`;
 };
@@ -170,12 +174,13 @@ async function request<T>(path: string, init?: RequestInit, fallbackError = 'Err
 
 export async function register(body: {
   username: string;
-  email: string;
+  gmail: string;
   dni: string;
   fullName: string;
   password: string;
+  repeatPassword: string;
 }) {
-  return request<{ user: { username: string; email: string; dni: string; fullName: string } }>(
+  return request<{ user: { username: string; gmail: string; dni: string; fullName: string } }>(
     '/api/v1/auth/register',
     { method: 'POST', body: JSON.stringify(body) },
     'No se pudo registrar'
@@ -191,7 +196,7 @@ export async function login(body: { username: string; password: string }) {
 }
 
 export async function logout() {
-  return request<{ ok: boolean }>('/api/v1/auth/logout', { method: 'POST', body: JSON.stringify({}) }, 'No se pudo cerrar sesion');
+  return request<{ ok: boolean }>('/api/v1/auth/logout', { method: 'POST' }, 'No se pudo cerrar sesion');
 }
 
 export async function getSession() {

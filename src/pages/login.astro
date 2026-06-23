@@ -37,6 +37,10 @@ import Layout from '../layouts/Layout.astro';
 					<input id="register-dni" name="dni" type="text" required inputmode="numeric" pattern="[0-9]{8}" maxlength="8" class="ios-input" />
 				</div>
 				<div class="field">
+					<label for="register-full-name" class="field-label">Nombre completo</label>
+					<input id="register-full-name" name="fullName" type="text" required autocomplete="name" class="ios-input" />
+				</div>
+				<div class="field">
 					<label for="register-username" class="field-label">Usuario</label>
 					<input id="register-username" name="username" type="text" required autocomplete="username" class="ios-input" />
 				</div>
@@ -67,7 +71,4 @@ import Layout from '../layouts/Layout.astro';
 	</main>
 </Layout>
 
-<script>
-	import initLogin from '../scripts/login';
-	initLogin();
-</script>
+<script src="../scripts/bootstrapLogin.ts"></script>
