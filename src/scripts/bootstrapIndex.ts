@@ -27,7 +27,19 @@ const goLogin = () => {
   window.location.replace('/login');
 };
 
+let settled = false;
+const fallbackRedirect = window.setTimeout(() => {
+  if (settled) return;
+  settled = true;
+  localStorage.removeItem(AUTH_FLAG_KEY);
+  goLogin();
+}, 6000);
+
 void hasActiveSession().then((ok) => {
+  if (settled) return;
+  settled = true;
+  window.clearTimeout(fallbackRedirect);
+
   if (ok) {
     localStorage.setItem(AUTH_FLAG_KEY, '1');
     showApp();
