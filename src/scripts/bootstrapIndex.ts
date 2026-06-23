@@ -2,6 +2,7 @@ import { hasActiveSession } from './auth';
 
 const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
 const main = document.getElementById('app-main');
+const loading = document.getElementById('app-loading');
 const params = new URLSearchParams(window.location.search);
 const auth = params.get('auth');
 const provider = params.get('provider');
@@ -9,6 +10,7 @@ const reason = params.get('reason');
 
 const showApp = () => {
   if (main) main.classList.remove('hidden');
+  if (loading) loading.classList.add('hidden');
 };
 
 const goLogin = () => {

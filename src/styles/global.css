@@ -534,6 +534,7 @@ body::-webkit-scrollbar-thumb {
 	font-weight: 700;
 	cursor: pointer;
 	transition: var(--transition);
+	text-decoration: none;
 }
 
 .social-btn:hover {
@@ -575,6 +576,29 @@ body::-webkit-scrollbar-thumb {
 	cursor: pointer;
 	padding: 0;
 	margin-left: 6px;
+}
+
+.auth-loading-card {
+	width: min(420px, 100%);
+	margin: 120px auto 0;
+	padding: 28px 24px;
+	border: 1px solid #2c2c2e;
+	border-radius: 24px;
+	background: #1c1c1e;
+	box-shadow: var(--shadow-soft);
+	text-align: center;
+}
+
+.auth-loading-title {
+	margin: 0 0 8px;
+	font-size: 1.1rem;
+	font-weight: 700;
+}
+
+.auth-loading-text {
+	margin: 0;
+	color: var(--plomo-2);
+	font-size: 0.9rem;
 }
 
 @media (max-width: 640px) {

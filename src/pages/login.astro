@@ -1,6 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import bootstrapLoginUrl from '../scripts/bootstrapLogin.ts?url';
+
+const apiBaseUrl =
+  (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
+  (import.meta.env.PUBLIC_API_BASE_URL as string | undefined)?.trim() ||
+  'https://backend-oso-frances.onrender.com';
+const googleLoginUrl = `${apiBaseUrl}/api/v1/auth/google/login`;
 ---
 
 <Layout title="Acceso">
@@ -14,7 +20,7 @@ import bootstrapLoginUrl from '../scripts/bootstrapLogin.ts?url';
       <form id="login-form" class="form-stack">
         <h2 class="auth-section-title">Iniciar sesion</h2>
         <p id="auth-status" class="alert hidden"></p>
-        <button id="login-google" type="button" class="social-btn social-btn-google">
+        <a id="login-google" href={googleLoginUrl} class="social-btn social-btn-google">
           <span class="social-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" class="google-icon" role="img">
               <path
@@ -36,7 +42,7 @@ import bootstrapLoginUrl from '../scripts/bootstrapLogin.ts?url';
             </svg>
           </span>
           <span>Continuar con Google</span>
-        </button>
+        </a>
         <div class="auth-divider" aria-hidden="true"></div>
         <div class="field">
           <label for="login-username" class="field-label">Usuario</label>
