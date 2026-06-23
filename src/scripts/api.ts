@@ -1,7 +1,7 @@
 export const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
   (import.meta.env.PUBLIC_API_BASE_URL as string | undefined)?.trim() ||
-  'http://localhost:8080';
+  'https://backend-oso-frances.onrender.com';
 
 export const NETWORK_ERROR_MESSAGE =
   'No se pudo conectar con el backend. Si esta vivo, revisa CORS (origen del frontend) y cookies cross-site.';
@@ -12,8 +12,6 @@ const getCurrentOrigin = (): string => {
 };
 
 export async function diagnoseBackendConnection(): Promise<string> {
-  // 1) Reachability check ignoring CORS restrictions.
-  // If this fails, it is very likely DNS/network/firewall.
   try {
     await fetch(`${API_BASE_URL}/health`, {
       method: 'GET',
@@ -24,7 +22,6 @@ export async function diagnoseBackendConnection(): Promise<string> {
     return `No se logro conectar a ${API_BASE_URL} desde ${getCurrentOrigin()}. Revisa URL, DNS, firewall o bloqueo de red.`;
   }
 
-  // 2) CORS-aware check to confirm whether browser can read the response.
   try {
     const response = await fetch(`${API_BASE_URL}/health`, {
       method: 'GET',

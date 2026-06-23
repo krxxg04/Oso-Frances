@@ -1,7 +1,7 @@
-﻿export const API_BASE_URL =
+export const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
   (import.meta.env.PUBLIC_API_BASE_URL as string | undefined)?.trim() ||
-  'http://localhost:8080';
+  'https://backend-oso-frances.onrender.com';
 
 type ApiErrorPayload = {
   detail?: string | Array<{ msg?: string } | string>;
@@ -258,4 +258,3 @@ export async function getSimulations(filters: SimulationFilters = {}) {
 export async function getSimulationById(id: string) {
   return request<SimulationResult>(`/api/v1/simulaciones/${id}`, { method: 'GET' }, 'No se pudo obtener simulacion');
 }
-

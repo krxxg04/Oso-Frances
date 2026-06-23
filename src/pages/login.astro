@@ -12,6 +12,9 @@ import Layout from '../layouts/Layout.astro';
 
 			<form id="login-form" class="form-stack">
 				<h2 class="auth-section-title">Iniciar sesion</h2>
+				<p id="auth-status" class="alert hidden"></p>
+				<button id="login-google" type="button" class="btn-secondary google-btn">Continuar con Google</button>
+				<div class="auth-divider" aria-hidden="true"></div>
 				<div class="field">
 					<label for="login-username" class="field-label">Usuario</label>
 					<input id="login-username" name="username" type="text" required autocomplete="username" class="ios-input" />
@@ -71,4 +74,4 @@ import Layout from '../layouts/Layout.astro';
 	</main>
 </Layout>
 
-<script src="../scripts/bootstrapLogin.ts"></script>
+<script is:inline type="module" src="/src/scripts/bootstrapLogin.ts"></script>

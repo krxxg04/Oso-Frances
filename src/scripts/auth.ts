@@ -118,6 +118,11 @@ export async function logout(): Promise<AuthResult> {
   return postAuth('/api/v1/auth/logout', null, 'No se pudo cerrar sesion.');
 }
 
+export function loginWithGoogle(): void {
+  if (!isBrowser()) return;
+  window.location.href = `${API_BASE_URL}/api/v1/auth/google/login`;
+}
+
 export async function hasActiveSession(): Promise<boolean> {
   if (!isBrowser()) return false;
 

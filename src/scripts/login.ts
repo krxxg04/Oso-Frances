@@ -1,4 +1,4 @@
-﻿import { hasActiveSession, login, register } from './auth';
+import { hasActiveSession, login, loginWithGoogle, register } from './auth';
 
 const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
 
@@ -22,6 +22,7 @@ export default function initLogin(): void {
   const loginSubtitle = getRequiredEl<HTMLParagraphElement>('login-subtitle');
   const goRegisterBtn = getRequiredEl<HTMLButtonElement>('go-register');
   const goLoginBtn = getRequiredEl<HTMLButtonElement>('go-login');
+  const loginGoogleBtn = getRequiredEl<HTMLButtonElement>('login-google');
   const loginUsernameEl = getRequiredEl<HTMLInputElement>('login-username');
   const loginPasswordEl = getRequiredEl<HTMLInputElement>('login-password');
   const registerDniEl = getRequiredEl<HTMLInputElement>('register-dni');
@@ -33,10 +34,24 @@ export default function initLogin(): void {
   const loginErrorEl = getRequiredEl<HTMLParagraphElement>('login-error');
   const registerErrorEl = getRequiredEl<HTMLParagraphElement>('register-error');
   const registerSuccessEl = getRequiredEl<HTMLParagraphElement>('register-success');
+  const authStatusEl = getRequiredEl<HTMLParagraphElement>('auth-status');
 
   setHidden(loginErrorEl, true);
   setHidden(registerErrorEl, true);
   setHidden(registerSuccessEl, true);
+  setHidden(authStatusEl, true);
+
+  const params = new URLSearchParams(window.location.search);
+  const googleAuth = params.get('auth');
+  const googleProvider = params.get('provider');
+  const googleReason = params.get('reason');
+
+  if (googleProvider === 'google' && googleAuth === 'error') {
+    authStatusEl.textContent = googleReason
+      ? `No se pudo iniciar sesion con Google: ${decodeURIComponent(googleReason)}`
+      : 'No se pudo iniciar sesion con Google.';
+    setHidden(authStatusEl, false);
+  }
 
   const showLogin = () => {
     setHidden(registerForm, true);
@@ -55,6 +70,9 @@ export default function initLogin(): void {
 
   goRegisterBtn.addEventListener('click', showRegister);
   goLoginBtn.addEventListener('click', showLogin);
+  loginGoogleBtn.addEventListener('click', () => {
+    loginWithGoogle();
+  });
 
   void hasActiveSession().then((active) => {
     if (active) {
@@ -68,6 +86,7 @@ export default function initLogin(): void {
     if (!loginForm.reportValidity()) return;
 
     setHidden(loginErrorEl, true);
+    setHidden(authStatusEl, true);
     const result = await login(loginUsernameEl.value, loginPasswordEl.value);
 
     if (!result.ok) {
@@ -95,6 +114,7 @@ export default function initLogin(): void {
 
     setHidden(registerErrorEl, true);
     setHidden(registerSuccessEl, true);
+    setHidden(authStatusEl, true);
 
     const password = registerPasswordEl.value;
     const passwordConfirm = registerPasswordConfirmEl.value;
@@ -143,4 +163,3 @@ export default function initLogin(): void {
     window.location.assign('/');
   });
 }
-
