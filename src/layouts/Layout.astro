@@ -1,6 +1,5 @@
 ---
 import '../styles/global.css';
-import bootstrapNavUrl from '../scripts/bootstrapNav.ts?url';
 
 const { title } = Astro.props;
 ---
@@ -36,6 +35,8 @@ const { title } = Astro.props;
         <slot />
       </div>
     </div>
-    <script type="module" src={bootstrapNavUrl}></script>
+    <script type="module">
+      import '../scripts/bootstrapNav.ts';
+    </script>
   </body>
 </html>

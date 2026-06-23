@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import bootstrapLoginUrl from '../scripts/bootstrapLogin.ts?url';
 
 const apiBaseUrl =
   (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
@@ -103,4 +102,6 @@ const googleLoginUrl = `${apiBaseUrl}/api/v1/auth/google/login`;
   </main>
 </Layout>
 
-<script type="module" src={bootstrapLoginUrl}></script>
+<script type="module">
+  import '../scripts/bootstrapLogin.ts';
+</script>
