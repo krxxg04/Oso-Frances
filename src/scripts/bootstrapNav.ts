@@ -1,3 +1,7 @@
 import initNavAuth from './navAuth';
 
-initNavAuth();
+export default function bootstrapNav(): void {
+  initNavAuth();
+}
+
+bootstrapNav();

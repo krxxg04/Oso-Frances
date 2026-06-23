@@ -1,3 +1,7 @@
 import initLogin from './login';
 
-initLogin();
+export default function bootstrapLogin(): void {
+  initLogin();
+}
+
+bootstrapLogin();
