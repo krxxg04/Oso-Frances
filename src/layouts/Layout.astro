@@ -1,39 +1,41 @@
-﻿---
+---
 import '../styles/global.css';
+import bootstrapNavUrl from '../scripts/bootstrapNav.ts?url';
+
 const { title } = Astro.props;
 ---
-	<!doctype html>
-	<html lang="es">
-		<head>
-			<meta charset="UTF-8" />
-			<meta name="viewport" content="width=device-width" />
-			<link rel="icon" type="image/png" href="/Whiteosito.png" />
-			<link rel="apple-touch-icon" href="/Whiteosito.png" />
-			<title>{title ? `${title} · El Oso Francés` : 'El Oso Francés'}</title>
-		</head>
-		<body class="app-body">
-			<div class="app-shell">
-				<header class="navbar">
-					<div class="nav-inner">
-						<div class="nav-brand">
-							<img src="/Whiteosito.png" alt="El Oso Francés" class="nav-logo" />
-							<div>
-								<p class="nav-title">El Oso Francés</p>
-								<p class="nav-subtitle">Crédito vehicular premium</p>
-							</div>
-						</div>
-						<div class="nav-actions">
-							<span class="nav-pill">Banca privada</span>
-							<a id="nav-login-link" href="/login" class="nav-link">Iniciar sesión</a>
-							<button id="nav-logout-btn" type="button" class="nav-link hidden">Cerrar sesión</button>
-						</div>
-					</div>
-				</header>
-			<div class="app-content">
-				<slot />
-			</div>
-		</div>
-			<script is:inline type="module" src="/src/scripts/bootstrapNav.ts"></script>
-		</body>
-	</html>
 
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/Whiteosito.png" />
+    <link rel="apple-touch-icon" href="/Whiteosito.png" />
+    <title>{title ? `${title} · El Oso Francés` : 'El Oso Francés'}</title>
+  </head>
+  <body class="app-body">
+    <div class="app-shell">
+      <header class="navbar">
+        <div class="nav-inner">
+          <div class="nav-brand">
+            <img src="/Whiteosito.png" alt="El Oso Francés" class="nav-logo" />
+            <div>
+              <p class="nav-title">El Oso Francés</p>
+              <p class="nav-subtitle">Crédito vehicular premium</p>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <span class="nav-pill">Banca privada</span>
+            <a id="nav-login-link" href="/login" class="nav-link">Iniciar sesión</a>
+            <button id="nav-logout-btn" type="button" class="nav-link hidden">Cerrar sesión</button>
+          </div>
+        </div>
+      </header>
+      <div class="app-content">
+        <slot />
+      </div>
+    </div>
+    <script type="module" src={bootstrapNavUrl}></script>
+  </body>
+</html>

@@ -1,6 +1,7 @@
-﻿---
+---
 import Layout from '../layouts/Layout.astro';
 import SimuladorCredito from '../components/SimuladorCredito.astro';
+import bootstrapIndexUrl from '../scripts/bootstrapIndex.ts?url';
 ---
 
 <Layout title="Credito Vehicular">
@@ -9,5 +10,4 @@ import SimuladorCredito from '../components/SimuladorCredito.astro';
   </main>
 </Layout>
 
-<script is:inline type="module" src="/src/scripts/bootstrapIndex.ts"></script>
-
+<script type="module" src={bootstrapIndexUrl}></script>
