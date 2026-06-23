@@ -518,6 +518,48 @@ body::-webkit-scrollbar-thumb {
 	margin: 22px 0;
 }
 
+.social-btn {
+	width: 100%;
+	min-height: 52px;
+	border: 1px solid #5a5a61;
+	border-radius: 999px;
+	padding: 12px 18px;
+	background: #232326;
+	color: #f2f2f7;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	font-size: 0.98rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: var(--transition);
+}
+
+.social-btn:hover {
+	transform: translateY(-1px);
+	background: #2b2c30;
+	border-color: #76767d;
+}
+
+.social-btn-google {
+	margin-top: -4px;
+}
+
+.social-icon {
+	width: 20px;
+	height: 20px;
+	display: inline-grid;
+	place-items: center;
+	flex: 0 0 auto;
+}
+
+.google-icon {
+	width: 20px;
+	height: 20px;
+	display: block;
+}
+
 .auth-switch {
 	margin: 2px 0 0;
 	font-size: 0.84rem;

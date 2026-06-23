@@ -3,7 +3,7 @@
 type ApiErrorPayload = {
   detail?: string | Array<{ msg?: string } | string>;
   message?: string;
-  error?: string;
+  error?: string | { code?: string; message?: string; field?: string };
 };
 
 type AuthResult = {
@@ -25,6 +25,7 @@ const buildErrorMessage = (status: number, payload: unknown, fallback: string): 
   if (data?.detail && typeof data.detail === 'string') return data.detail;
   if (data?.message && typeof data.message === 'string') return data.message;
   if (data?.error && typeof data.error === 'string') return data.error;
+  if (typeof data?.error === 'object' && typeof data.error?.message === 'string') return data.error.message;
 
   if (payload && typeof payload === 'object') {
     return `${fallback} (HTTP ${status}) - ${JSON.stringify(payload)}`;
@@ -47,13 +48,17 @@ const safePayload = async (response: Response): Promise<unknown> => {
   }
 };
 
-async function postAuth(path: string, body: Record<string, unknown>, fallbackError: string): Promise<AuthResult> {
+async function postAuth(
+  path: string,
+  body: Record<string, unknown> | null,
+  fallbackError: string
+): Promise<AuthResult> {
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(body),
+      ...(body ? { body: JSON.stringify(body) } : {}),
     });
 
     const payload = await safePayload(response);
@@ -70,17 +75,22 @@ async function postAuth(path: string, body: Record<string, unknown>, fallbackErr
 
 export async function register(
   dni: string,
+  fullName: string,
   gmail: string,
   username: string,
   password: string,
   repeatPassword: string
 ): Promise<AuthResult> {
   const dniValue = dni.trim();
+  const name = fullName.trim();
   const user = username.trim();
   const mail = gmail.trim().toLowerCase();
 
-  if (!dniValue || !user || !mail || !password || !repeatPassword) {
-    return { ok: false, message: 'DNI, usuario, gmail, contrasena y repetir contrasena son obligatorios.' };
+  if (!dniValue || !name || !user || !mail || !password || !repeatPassword) {
+    return {
+      ok: false,
+      message: 'DNI, nombre completo, usuario, gmail, contrasena y repetir contrasena son obligatorios.',
+    };
   }
 
   if (!/^\d{8}$/.test(dniValue)) {
@@ -93,7 +103,7 @@ export async function register(
 
   return postAuth(
     '/api/v1/auth/register',
-    { dni: dniValue, username: user, gmail: mail, password, repeatPassword },
+    { dni: dniValue, fullName: name, username: user, gmail: mail, password, repeatPassword },
     'No se pudo crear la cuenta.'
   );
 }
@@ -105,7 +115,12 @@ export async function login(username: string, password: string): Promise<AuthRes
 }
 
 export async function logout(): Promise<AuthResult> {
-  return postAuth('/api/v1/auth/logout', {}, 'No se pudo cerrar sesion.');
+  return postAuth('/api/v1/auth/logout', null, 'No se pudo cerrar sesion.');
+}
+
+export function loginWithGoogle(): void {
+  if (!isBrowser()) return;
+  window.location.href = `${API_BASE_URL}/api/v1/auth/google/login`;
 }
 
 export async function hasActiveSession(): Promise<boolean> {
@@ -116,7 +131,9 @@ export async function hasActiveSession(): Promise<boolean> {
       method: 'GET',
       credentials: 'include',
     });
-    return response.ok;
+    if (!response.ok) return false;
+    const payload = (await safePayload(response)) as { authenticated?: boolean } | null;
+    return payload?.authenticated === true;
   } catch {
     return false;
   }

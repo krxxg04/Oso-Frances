@@ -9,6 +9,7 @@
   type SimulationCreatePayload,
   type SimulationResult,
   type TipoGracia,
+  type TipoTasa,
   type Vehiculo,
 } from '../services/api';
 
@@ -71,7 +72,10 @@ export default function initSimuladorCredito(): void {
   const bancoInfoTextEl = getRequiredEl<HTMLParagraphElement>('banco-info-text');
 
   const manualRateFieldsEl = getRequiredEl<HTMLDivElement>('manual-rate-fields');
-  const tasaEfectivaAnualEl = getRequiredEl<HTMLInputElement>('tasaEfectivaAnual');
+  const tipoTasaEl = getRequiredEl<HTMLSelectElement>('tipoTasa');
+  const tasaAnualEl = getRequiredEl<HTMLInputElement>('tasaAnual');
+  const frecuenciaCapitalizacionFieldEl = getRequiredEl<HTMLDivElement>('frecuencia-capitalizacion-field');
+  const frecuenciaCapitalizacionEl = getRequiredEl<HTMLInputElement>('frecuenciaCapitalizacion');
   const seguroDesgravamenAnualEl = getRequiredEl<HTMLInputElement>('seguroDesgravamenAnual');
 
   const resumenGridEl = getRequiredEl<HTMLDivElement>('resumen-grid');
@@ -128,6 +132,11 @@ export default function initSimuladorCredito(): void {
     manualRateFieldsEl.classList.toggle('hidden', hasBank);
   };
 
+  const updateCapitalizacionVisibility = () => {
+    const shouldShow = !bancoIdEl.value && tipoTasaEl.value === 'nominal';
+    frecuenciaCapitalizacionFieldEl.classList.toggle('hidden', !shouldShow);
+  };
+
   const renderBankInfo = (bank: Banco | null) => {
     if (!bank) {
       bancoInfoWrapEl.classList.add('hidden');
@@ -136,7 +145,7 @@ export default function initSimuladorCredito(): void {
     }
 
     bancoInfoWrapEl.classList.remove('hidden');
-    tasaEfectivaAnualEl.value = String(bank.tasaEfectivaAnual);
+    tasaAnualEl.value = String(bank.tasaEfectivaAnual);
     seguroDesgravamenAnualEl.value = String(bank.seguroDesgravamenAnual);
     bancoInfoTextEl.textContent = `${bank.nombre} · ${bank.producto} · TEA ${pctAutoRate(bank.tasaEfectivaAnual)} · Seguro desgravamen mensual ${pctFromPercentage(bank.seguroDesgravamenMensual)}`;
   };
@@ -337,9 +346,13 @@ export default function initSimuladorCredito(): void {
       return 'Ingresa una cuota inicial válida.';
     const bank = getSelectedBank();
     if (!bank) {
-      if (!Number.isFinite(toNumber(tasaEfectivaAnualEl)) || toNumber(tasaEfectivaAnualEl) <= 0)
-        return 'Ingresa una Tasa Efectiva Anual (TEA) mayor a 0.';
-      if (toNumber(tasaEfectivaAnualEl) > 100) return 'La TEA debe estar entre 0 y 100.';
+      if (!Number.isFinite(toNumber(tasaAnualEl)) || toNumber(tasaAnualEl) <= 0)
+        return 'Ingresa una tasa anual mayor a 0.';
+      if (toNumber(tasaAnualEl) > 100) return 'La tasa anual debe estar entre 0 y 100.';
+      if (tipoTasaEl.value === 'nominal') {
+        const frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
+        if (frecuenciaCapitalizacion <= 0) return 'La frecuencia de capitalizacion debe ser mayor a 0.';
+      }
       const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
       if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual válido.';
       if (seguroDesgravamen < 0 || seguroDesgravamen > 100)
@@ -389,7 +402,10 @@ export default function initSimuladorCredito(): void {
     renderBankInfo(bank);
     applyBankConstraints(bank);
     updateManualRateVisibility();
+    updateCapitalizacionVisibility();
   });
+
+  tipoTasaEl.addEventListener('change', updateCapitalizacionVisibility);
 
   tipoGraciaEl.addEventListener('change', () => {
     if (tipoGraciaEl.value === 'sin_gracia') {
@@ -458,10 +474,8 @@ export default function initSimuladorCredito(): void {
     const payload: SimulationCreatePayload = {
       moneda: monedaEl.value,
       vehiculo: selectedVehicleData(),
-      precioVehiculo: toNumber(precioVehiculoEl),
       porcentajeCuotaInicial: toNumber(porcentajeCuotaInicialEl),
       plazoMeses: Number(plazoMesesEl.value),
-      tasaEfectivaAnual: toNumber(tasaEfectivaAnualEl),
       periodosPorAnio: 12,
       periodosGracia,
       tipoGracia,
@@ -473,8 +487,12 @@ export default function initSimuladorCredito(): void {
     const bank = getSelectedBank();
     if (bank) {
       payload.bancoId = bank.id;
-      payload.tasaEfectivaAnual = bank.tasaEfectivaAnual;
     } else {
+      payload.tipoTasa = tipoTasaEl.value as TipoTasa;
+      payload.tasaAnual = toNumber(tasaAnualEl);
+      if (payload.tipoTasa === 'nominal') {
+        payload.frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
+      }
       payload.seguroDesgravamenAnual = toNumber(seguroDesgravamenAnualEl);
     }
 
@@ -552,6 +570,7 @@ export default function initSimuladorCredito(): void {
       await Promise.all([loadBanks(), loadVehicles()]);
       await loadHistory();
       updateManualRateVisibility();
+      updateCapitalizacionVisibility();
       applyBankConstraints(null);
       tipoGraciaEl.dispatchEvent(new Event('change'));
     } catch (error) {
