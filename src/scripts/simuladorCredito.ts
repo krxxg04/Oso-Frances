@@ -44,6 +44,8 @@ const setMessage = (el: HTMLElement, message: string, hidden: boolean) => {
   el.classList.toggle('hidden', hidden);
 };
 
+const MANUAL_BANK_ID = 'manual';
+
 export default function initSimuladorCredito(): void {
   const form = getRequiredEl<HTMLFormElement>('simulador-form');
   const errorEl = getRequiredEl<HTMLParagraphElement>('simulador-error');
@@ -116,6 +118,7 @@ export default function initSimuladorCredito(): void {
 
     const inputObj = (sim as unknown as { input?: Record<string, unknown> }).input;
     if (typeof inputObj?.bancoNombre === 'string' && inputObj.bancoNombre) return inputObj.bancoNombre;
+    if (inputObj?.bancoId === MANUAL_BANK_ID) return 'Manual';
     if (typeof inputObj?.bancoId === 'string' && inputObj.bancoId) return inputObj.bancoId;
 
     return '-';
@@ -128,12 +131,11 @@ export default function initSimuladorCredito(): void {
   };
 
   const updateManualRateVisibility = () => {
-    const hasBank = !!bancoIdEl.value;
-    manualRateFieldsEl.classList.toggle('hidden', hasBank);
+    manualRateFieldsEl.classList.toggle('hidden', bancoIdEl.value !== MANUAL_BANK_ID);
   };
 
   const updateCapitalizacionVisibility = () => {
-    const shouldShow = !bancoIdEl.value && tipoTasaEl.value === 'nominal';
+    const shouldShow = bancoIdEl.value === MANUAL_BANK_ID && tipoTasaEl.value === 'nominal';
     frecuenciaCapitalizacionFieldEl.classList.toggle('hidden', !shouldShow);
   };
 
@@ -180,7 +182,10 @@ export default function initSimuladorCredito(): void {
     }
   };
 
-  const getSelectedBank = (): Banco | null => bancos.find((item) => item.id === bancoIdEl.value) ?? null;
+  const getSelectedBank = (): Banco | null => {
+    if (bancoIdEl.value === MANUAL_BANK_ID) return null;
+    return bancos.find((item) => item.id === bancoIdEl.value) ?? null;
+  };
 
   const renderResumen = (result: SimulationResult, currency: string) => {
     const resumen = result.result?.resumen;
@@ -312,7 +317,7 @@ export default function initSimuladorCredito(): void {
     const data = await getBanks();
     bancos = data.items || [];
 
-    bancoIdEl.innerHTML = `<option value="">Sin banco (manual)</option>${bancos
+    bancoIdEl.innerHTML = `<option value="${MANUAL_BANK_ID}">Sin banco (manual)</option>${bancos
       .map((bank) => `<option value="${bank.id}">${bank.nombre} - ${bank.producto}</option>`)
       .join('')}`;
   };
@@ -342,35 +347,45 @@ export default function initSimuladorCredito(): void {
     if (!modeloEl.value.trim()) return 'Ingresa el modelo del vehículo.';
     if (!Number.isFinite(toNumber(anioEl)) || toNumber(anioEl) < 2000) return 'Ingresa un año válido (>= 2000).';
     if (!tipoEl.value.trim()) return 'Ingresa el tipo de vehículo.';
-    if (!Number.isFinite(toNumber(precioVehiculoEl)) || toNumber(precioVehiculoEl) <= 0)
-      return 'Ingresa un precio de vehículo mayor a 0.';
+    if (!Number.isFinite(toNumber(precioVehiculoEl)) || toNumber(precioVehiculoEl) < 2000)
+      return 'Ingresa un precio de vehiculo mayor o igual a 2000.';
     if (!Number.isFinite(cuotaInicial) || cuotaInicial < 0)
       return 'Ingresa una cuota inicial válida.';
     if (cuotaInicial > 100) return 'La cuota inicial debe estar entre 0% y 100%.';
     const bank = getSelectedBank();
     if (!bank) {
-      return 'Selecciona un banco. El backend actual solo acepta simulaciones guardadas con bancoId.';
-    }
+      if (!Number.isFinite(toNumber(tasaAnualEl)) || toNumber(tasaAnualEl) <= 0)
+        return 'Ingresa una tasa anual mayor a 0.';
+      if (toNumber(tasaAnualEl) > 100) return 'La tasa anual debe estar entre 0 y 100.';
+      if (tipoTasaEl.value === 'nominal') {
+        const frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
+        if (frecuenciaCapitalizacion <= 0) return 'La frecuencia de capitalizacion debe ser mayor a 0.';
+      }
+      const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
+      if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual valido.';
+      if (seguroDesgravamen < 0 || seguroDesgravamen > 100)
+        return 'El seguro de desgravamen anual debe estar entre 0 y 100.';
+    } else {
+      if (monedaEl.value !== bank.moneda) {
+        return `La moneda para ${bank.nombre} debe ser ${bank.moneda}.`;
+      }
 
-    if (monedaEl.value !== bank.moneda) {
-      return `La moneda para ${bank.nombre} debe ser ${bank.moneda}.`;
-    }
+      if (toNumber(precioVehiculoEl) < bank.montoMin) {
+        return `El precio del vehiculo para ${bank.nombre} debe ser al menos ${bank.montoMin} ${bank.moneda}.`;
+      }
 
-    if (toNumber(precioVehiculoEl) < bank.montoMin) {
-      return `El precio del vehiculo para ${bank.nombre} debe ser al menos ${bank.montoMin} ${bank.moneda}.`;
-    }
+      if (cuotaInicial < bank.porcentajeCuotaInicialMin || cuotaInicial > bank.porcentajeCuotaInicialMax) {
+        return `La cuota inicial para ${bank.nombre} debe estar entre ${bank.porcentajeCuotaInicialMin}% y ${bank.porcentajeCuotaInicialMax}%.`;
+      }
 
-    if (cuotaInicial < bank.porcentajeCuotaInicialMin || cuotaInicial > bank.porcentajeCuotaInicialMax) {
-      return `La cuota inicial para ${bank.nombre} debe estar entre ${bank.porcentajeCuotaInicialMin}% y ${bank.porcentajeCuotaInicialMax}%.`;
-    }
+      const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
+      if (periodosGracia > bank.periodosGraciaMax) {
+        return `El numero de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
+      }
 
-    const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
-    if (periodosGracia > bank.periodosGraciaMax) {
-      return `El número de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
-    }
-
-    if (!bank.plazosMeses.includes(Number(plazoMesesEl.value))) {
-      return `El plazo para ${bank.nombre} debe ser uno de estos valores: ${bank.plazosMeses.join(', ')} meses.`;
+      if (!bank.plazosMeses.includes(Number(plazoMesesEl.value))) {
+        return `El plazo para ${bank.nombre} debe ser uno de estos valores: ${bank.plazosMeses.join(', ')} meses.`;
+      }
     }
     if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInicioEl.value)) return 'La fecha de inicio debe estar en formato YYYY-MM-DD.';
@@ -493,8 +508,12 @@ export default function initSimuladorCredito(): void {
     if (bank) {
       payload.bancoId = bank.id;
     } else {
+      payload.bancoId = MANUAL_BANK_ID;
       payload.tipoTasa = tipoTasaEl.value as TipoTasa;
       payload.tasaAnual = toNumber(tasaAnualEl);
+      if (payload.tipoTasa === 'efectiva') {
+        payload.tasaEfectivaAnual = payload.tasaAnual;
+      }
       if (payload.tipoTasa === 'nominal') {
         payload.frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
       }
