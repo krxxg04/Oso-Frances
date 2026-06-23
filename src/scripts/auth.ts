@@ -126,16 +126,22 @@ export function loginWithGoogle(): void {
 export async function hasActiveSession(): Promise<boolean> {
   if (!isBrowser()) return false;
 
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 5000);
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/session`, {
       method: 'GET',
       credentials: 'include',
+      signal: controller.signal,
     });
     if (!response.ok) return false;
     const payload = (await safePayload(response)) as { authenticated?: boolean } | null;
     return payload?.authenticated === true;
   } catch {
     return false;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 }
 

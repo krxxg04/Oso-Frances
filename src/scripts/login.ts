@@ -1,4 +1,4 @@
-import { hasActiveSession, login, loginWithGoogle, register } from './auth';
+import { hasActiveSession, login, register } from './auth';
 
 const AUTH_FLAG_KEY = 'oso_auth_ok_v1';
 
@@ -22,7 +22,6 @@ export default function initLogin(): void {
   const loginSubtitle = getRequiredEl<HTMLParagraphElement>('login-subtitle');
   const goRegisterBtn = getRequiredEl<HTMLButtonElement>('go-register');
   const goLoginBtn = getRequiredEl<HTMLButtonElement>('go-login');
-  const loginGoogleBtn = getRequiredEl<HTMLButtonElement>('login-google');
   const loginUsernameEl = getRequiredEl<HTMLInputElement>('login-username');
   const loginPasswordEl = getRequiredEl<HTMLInputElement>('login-password');
   const registerDniEl = getRequiredEl<HTMLInputElement>('register-dni');
@@ -70,10 +69,6 @@ export default function initLogin(): void {
 
   goRegisterBtn.addEventListener('click', showRegister);
   goLoginBtn.addEventListener('click', showLogin);
-  loginGoogleBtn.addEventListener('click', () => {
-    loginWithGoogle();
-  });
-
   void hasActiveSession().then((active) => {
     if (active) {
       localStorage.setItem(AUTH_FLAG_KEY, '1');

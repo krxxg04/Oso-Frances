@@ -14,15 +14,12 @@ export default function initNavAuth(): void {
 
   if (!loginLink || !logoutButton) return;
 
+  setHidden(loginLink, true);
   if (isLoginPage) {
-    // En login no mostrar ni "Iniciar sesion" ni "Cerrar sesion" en la navbar.
-    setHidden(loginLink, true);
     setHidden(logoutButton, true);
     return;
   }
 
-  // En la app siempre mostrar "Cerrar sesion".
-  setHidden(loginLink, true);
   setHidden(logoutButton, false);
 
   logoutButton.addEventListener('click', async () => {
