@@ -5,8 +5,14 @@ export const API_BASE_URL =
 
 type ApiErrorPayload = {
   detail?: string | Array<{ msg?: string } | string>;
+  details?: string | Array<{ msg?: string; field?: string } | string>;
   message?: string;
   error?: string | { code?: string; message?: string; field?: string };
+  errors?:
+    | string[]
+    | Array<{ field?: string; message?: string; msg?: string }>
+    | Record<string, string | string[] | { message?: string; msg?: string }>;
+  violations?: Array<{ field?: string; message?: string; msg?: string }>;
 };
 
 export type UserSession = {
@@ -67,6 +73,7 @@ export type SimulationCreatePayload = {
   fechaInicio: string;
   tipoTasa?: TipoTasa;
   tasaAnual?: number;
+  tasaEfectivaAnual?: number;
   frecuenciaCapitalizacion?: number;
   seguroDesgravamenAnual?: number;
 };
@@ -125,17 +132,66 @@ export type SimulationResult = {
 
 const buildErrorMessage = (status: number, payload: unknown, fallback: string): string => {
   const data = payload as ApiErrorPayload | null;
+  const joinMessages = (messages: string[]): string | null => {
+    const clean = messages.map((item) => item.trim()).filter(Boolean);
+    return clean.length ? clean.join(' | ') : null;
+  };
+
+  const collectEntryMessage = (entry: unknown): string | null => {
+    if (typeof entry === 'string') return entry;
+    if (!entry || typeof entry !== 'object') return null;
+
+    const obj = entry as { field?: string; message?: string; msg?: string };
+    const message = obj.message ?? obj.msg;
+    if (!message) return null;
+    return obj.field ? `${obj.field}: ${message}` : message;
+  };
 
   if (Array.isArray(data?.detail)) {
-    const first = data.detail[0];
-    if (typeof first === 'string') return first;
-    if (first?.msg) return first.msg;
+    const combined = joinMessages(data.detail.map((item) => collectEntryMessage(item) ?? ''));
+    if (combined) return combined;
   }
 
   if (typeof data?.detail === 'string') return data.detail;
+  if (Array.isArray(data?.details)) {
+    const combined = joinMessages(data.details.map((item) => collectEntryMessage(item) ?? ''));
+    if (combined) return combined;
+  }
+  if (typeof data?.details === 'string') return data.details;
   if (typeof data?.message === 'string') return data.message;
   if (typeof data?.error === 'string') return data.error;
   if (typeof data?.error === 'object' && typeof data.error?.message === 'string') return data.error.message;
+
+  if (Array.isArray(data?.violations)) {
+    const combined = joinMessages(data.violations.map((item) => collectEntryMessage(item) ?? ''));
+    if (combined) return combined;
+  }
+
+  if (Array.isArray(data?.errors)) {
+    const combined = joinMessages(data.errors.map((item) => collectEntryMessage(item) ?? ''));
+    if (combined) return combined;
+  }
+
+  if (data?.errors && typeof data.errors === 'object' && !Array.isArray(data.errors)) {
+    const entries = Object.entries(data.errors).flatMap(([field, value]) => {
+      if (typeof value === 'string') return [`${field}: ${value}`];
+      if (Array.isArray(value)) return value.map((item) => `${field}: ${item}`);
+      if (value && typeof value === 'object') {
+        const nestedMessage =
+          ('message' in value && typeof value.message === 'string' && value.message) ||
+          ('msg' in value && typeof value.msg === 'string' && value.msg) ||
+          '';
+        return nestedMessage ? [`${field}: ${nestedMessage}`] : [];
+      }
+      return [];
+    });
+    const combined = joinMessages(entries);
+    if (combined) return combined;
+  }
+
+  if (payload && typeof payload === 'object') {
+    return `${fallback} (HTTP ${status}) - ${JSON.stringify(payload)}`;
+  }
 
   return `${fallback} (HTTP ${status})`;
 };

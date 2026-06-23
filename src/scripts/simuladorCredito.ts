@@ -336,36 +336,41 @@ export default function initSimuladorCredito(): void {
   });
 
   const validateSimulationInputs = (): string | null => {
+    const cuotaInicial = toNumber(porcentajeCuotaInicialEl);
+
     if (!marcaEl.value.trim()) return 'Ingresa la marca del vehículo.';
     if (!modeloEl.value.trim()) return 'Ingresa el modelo del vehículo.';
     if (!Number.isFinite(toNumber(anioEl)) || toNumber(anioEl) < 2000) return 'Ingresa un año válido (>= 2000).';
     if (!tipoEl.value.trim()) return 'Ingresa el tipo de vehículo.';
     if (!Number.isFinite(toNumber(precioVehiculoEl)) || toNumber(precioVehiculoEl) <= 0)
       return 'Ingresa un precio de vehículo mayor a 0.';
-    if (!Number.isFinite(toNumber(porcentajeCuotaInicialEl)) || toNumber(porcentajeCuotaInicialEl) < 0)
+    if (!Number.isFinite(cuotaInicial) || cuotaInicial < 0)
       return 'Ingresa una cuota inicial válida.';
+    if (cuotaInicial > 100) return 'La cuota inicial debe estar entre 0% y 100%.';
     const bank = getSelectedBank();
     if (!bank) {
-      if (!Number.isFinite(toNumber(tasaAnualEl)) || toNumber(tasaAnualEl) <= 0)
-        return 'Ingresa una tasa anual mayor a 0.';
-      if (toNumber(tasaAnualEl) > 100) return 'La tasa anual debe estar entre 0 y 100.';
-      if (tipoTasaEl.value === 'nominal') {
-        const frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
-        if (frecuenciaCapitalizacion <= 0) return 'La frecuencia de capitalizacion debe ser mayor a 0.';
-      }
-      const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
-      if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual válido.';
-      if (seguroDesgravamen < 0 || seguroDesgravamen > 100)
-        return 'El seguro de desgravamen anual debe estar entre 0 y 100.';
-    } else {
-      const cuotaInicial = toNumber(porcentajeCuotaInicialEl);
-      if (cuotaInicial < bank.porcentajeCuotaInicialMin || cuotaInicial > bank.porcentajeCuotaInicialMax) {
-        return `La cuota inicial para ${bank.nombre} debe estar entre ${bank.porcentajeCuotaInicialMin}% y ${bank.porcentajeCuotaInicialMax}%.`;
-      }
-      const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
-      if (periodosGracia > bank.periodosGraciaMax) {
-        return `El número de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
-      }
+      return 'Selecciona un banco. El backend actual solo acepta simulaciones guardadas con bancoId.';
+    }
+
+    if (monedaEl.value !== bank.moneda) {
+      return `La moneda para ${bank.nombre} debe ser ${bank.moneda}.`;
+    }
+
+    if (toNumber(precioVehiculoEl) < bank.montoMin) {
+      return `El precio del vehiculo para ${bank.nombre} debe ser al menos ${bank.montoMin} ${bank.moneda}.`;
+    }
+
+    if (cuotaInicial < bank.porcentajeCuotaInicialMin || cuotaInicial > bank.porcentajeCuotaInicialMax) {
+      return `La cuota inicial para ${bank.nombre} debe estar entre ${bank.porcentajeCuotaInicialMin}% y ${bank.porcentajeCuotaInicialMax}%.`;
+    }
+
+    const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
+    if (periodosGracia > bank.periodosGraciaMax) {
+      return `El número de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
+    }
+
+    if (!bank.plazosMeses.includes(Number(plazoMesesEl.value))) {
+      return `El plazo para ${bank.nombre} debe ser uno de estos valores: ${bank.plazosMeses.join(', ')} meses.`;
     }
     if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInicioEl.value)) return 'La fecha de inicio debe estar en formato YYYY-MM-DD.';

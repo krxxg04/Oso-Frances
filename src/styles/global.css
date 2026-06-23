@@ -15,6 +15,8 @@
 	--shadow-float: 0 12px 28px #0a0a0a;
 	--transition: all 0.2s ease;
 	--font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+	--content-max-width: 1180px;
+	--content-gutter: 24px;
 }
 
 *,
@@ -101,9 +103,9 @@ body::-webkit-scrollbar-thumb {
 
 .app-content {
 	width: 100%;
-	max-width: 1120px;
+	max-width: var(--content-max-width);
 	margin: 0 auto;
-	padding: 32px 20px 80px;
+	padding: 40px var(--content-gutter) 88px;
 }
 
 .page-center {
@@ -126,9 +128,9 @@ body::-webkit-scrollbar-thumb {
 
 .nav-inner {
 	width: 100%;
-	max-width: 1120px;
+	max-width: var(--content-max-width);
 	margin: 0 auto;
-	padding: 18px 20px;
+	padding: 18px var(--content-gutter);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -196,6 +198,7 @@ body::-webkit-scrollbar-thumb {
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
+	flex-wrap: wrap;
 }
 
 .eyebrow {
@@ -234,7 +237,7 @@ body::-webkit-scrollbar-thumb {
 	background: #1c1c1e;
 	color: #f2f2f7;
 	border-radius: var(--radius-xl);
-	padding: 24px;
+	padding: 26px;
 	box-shadow: var(--shadow-card);
 	-webkit-backdrop-filter: blur(18px);
 	backdrop-filter: blur(18px);
@@ -458,6 +461,12 @@ body::-webkit-scrollbar-thumb {
 .simulador {
 	display: grid;
 	gap: 28px;
+	width: min(100%, 1120px);
+	margin: 0 auto;
+}
+
+.simulador > * {
+	min-width: 0;
 }
 
 .login-logo {
@@ -632,7 +641,7 @@ body::-webkit-scrollbar-thumb {
 
 @media (max-width: 1024px) {
 	.app-content {
-		padding: 24px 16px 64px;
+		padding: 28px 18px 64px;
 	}
 
 	.form-grid {
@@ -650,7 +659,7 @@ body::-webkit-scrollbar-thumb {
 
 @media (max-width: 768px) {
 	.app-content {
-		padding: 20px 14px 56px;
+		padding: 22px 14px 56px;
 	}
 
 	.card {
@@ -671,6 +680,10 @@ body::-webkit-scrollbar-thumb {
 	.card-header {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	.simulador {
+		width: 100%;
 	}
 
 	.cronograma-head {
