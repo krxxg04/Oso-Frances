@@ -601,6 +601,14 @@ body::-webkit-scrollbar-thumb {
 	font-size: 0.9rem;
 }
 
+.auth-loading-actions {
+	margin-top: 18px;
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
 @media (max-width: 640px) {
 	.nav-inner {
 		flex-direction: column;

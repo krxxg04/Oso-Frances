@@ -6,8 +6,18 @@ import bootstrapIndexUrl from '../scripts/bootstrapIndex.ts?url';
 
 <Layout title="Credito Vehicular">
   <div id="app-loading" class="auth-loading-card">
-    <p class="auth-loading-title">Verificando sesión...</p>
+    <p class="auth-loading-title">Verificando sesion...</p>
     <p class="auth-loading-text">Estamos validando tus credenciales con el backend.</p>
+  </div>
+  <div id="app-auth-error" class="auth-loading-card hidden">
+    <p class="auth-loading-title">No se pudo validar la sesion</p>
+    <p id="app-auth-error-text" class="auth-loading-text">
+      Revisa la conexion con el backend, CORS y la cookie de sesion.
+    </p>
+    <div class="auth-loading-actions">
+      <a href="/login" class="btn-primary">Ir al login</a>
+      <button id="app-auth-retry" type="button" class="nav-link">Reintentar</button>
+    </div>
   </div>
   <main id="app-main" class="hidden">
     <SimuladorCredito />
