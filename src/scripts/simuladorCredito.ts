@@ -126,7 +126,7 @@ export default function initSimuladorCredito(): void {
 
   const renderPlazos = (plazos: number[]) => {
     const unique = [...new Set(plazos)].sort((a, b) => a - b);
-    const options = unique.length > 0 ? unique : [12, 24, 36, 48, 60];
+    const options = unique.length > 0 ? unique : [24, 36];
     plazoMesesEl.innerHTML = options.map((plazo) => `<option value="${plazo}">${plazo}</option>`).join('');
   };
 
@@ -157,7 +157,7 @@ export default function initSimuladorCredito(): void {
       porcentajeCuotaInicialEl.min = '0';
       porcentajeCuotaInicialEl.max = '100';
       periodosGraciaEl.max = '120';
-      renderPlazos([12, 24, 36, 48, 60]);
+      renderPlazos([24, 36]);
       return;
     }
 
@@ -387,6 +387,9 @@ export default function initSimuladorCredito(): void {
         return `El plazo para ${bank.nombre} debe ser uno de estos valores: ${bank.plazosMeses.join(', ')} meses.`;
       }
     }
+    if (![24, 36].includes(Number(plazoMesesEl.value))) {
+      return 'El plazo debe ser 24 o 36 meses para Compra Inteligente.';
+    }
     if (!fechaInicioEl.value) return 'Selecciona una fecha de inicio.';
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInicioEl.value)) return 'La fecha de inicio debe estar en formato YYYY-MM-DD.';
     return null;
@@ -510,11 +513,11 @@ export default function initSimuladorCredito(): void {
     } else {
       payload.bancoId = MANUAL_BANK_ID;
       payload.tipoTasa = tipoTasaEl.value as TipoTasa;
-      payload.tasaAnual = toNumber(tasaAnualEl);
+      const tasaManual = toNumber(tasaAnualEl);
       if (payload.tipoTasa === 'efectiva') {
-        payload.tasaEfectivaAnual = payload.tasaAnual;
-      }
-      if (payload.tipoTasa === 'nominal') {
+        payload.tasaEfectivaAnual = tasaManual;
+      } else {
+        payload.tasaAnual = tasaManual;
         payload.frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
       }
       payload.seguroDesgravamenAnual = toNumber(seguroDesgravamenAnualEl);
