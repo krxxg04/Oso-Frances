@@ -1,7 +1,7 @@
 export const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
   (import.meta.env.PUBLIC_API_BASE_URL as string | undefined)?.trim() ||
-  'https://backend-oso-frances.onrender.com';
+  '';
 
 type ApiErrorPayload = {
   detail?: string | Array<{ msg?: string } | string>;
