@@ -11,13 +11,13 @@ const googleLoginUrl = `${apiBaseUrl}/api/v1/auth/google/login`;
 <Layout title="Acceso">
   <main class="page-center">
     <section class="login-card">
-      <img src="/Whiteosito.png" alt="El Oso Frances" class="login-logo" loading="eager" />
-      <p class="eyebrow login-eyebrow">El Oso Frances</p>
+      <img src="/Whiteosito.png" alt="El Oso Francés" class="login-logo" loading="eager" />
+      <p class="eyebrow login-eyebrow">El Oso Francés</p>
       <h1 class="login-title">Acceso seguro</h1>
-      <p id="login-subtitle" class="login-subtitle">Inicia sesion para continuar con el simulador.</p>
+      <p id="login-subtitle" class="login-subtitle">Inicia sesión para continuar con el simulador.</p>
 
       <form id="login-form" class="form-stack">
-        <h2 class="auth-section-title">Iniciar sesion</h2>
+        <h2 class="auth-section-title">Iniciar sesión</h2>
         <p id="auth-status" class="alert hidden"></p>
         <a id="login-google" href={googleLoginUrl} class="social-btn social-btn-google">
           <span class="social-icon" aria-hidden="true">
@@ -49,14 +49,14 @@ const googleLoginUrl = `${apiBaseUrl}/api/v1/auth/google/login`;
         </div>
 
         <div class="field">
-          <label for="login-password" class="field-label">Contrasena</label>
+          <label for="login-password" class="field-label">Contraseña</label>
           <input id="login-password" name="password" type="password" required autocomplete="current-password" class="ios-input" />
         </div>
 
         <p id="login-error" class="alert hidden"></p>
         <button type="submit" class="btn-primary">Ingresar</button>
         <p class="auth-switch">
-          No tienes cuenta?
+          ¿No tienes cuenta?
           <button id="go-register" type="button" class="auth-switch-link">Crear cuenta</button>
         </p>
       </form>
@@ -81,12 +81,12 @@ const googleLoginUrl = `${apiBaseUrl}/api/v1/auth/google/login`;
         </div>
 
         <div class="field">
-          <label for="register-password" class="field-label">Contrasena</label>
+          <label for="register-password" class="field-label">Contraseña</label>
           <input id="register-password" name="password" type="password" required autocomplete="new-password" class="ios-input" />
         </div>
 
         <div class="field">
-          <label for="register-password-confirm" class="field-label">Confirmar contrasena</label>
+          <label for="register-password-confirm" class="field-label">Confirmar contraseña</label>
           <input id="register-password-confirm" name="passwordConfirm" type="password" required autocomplete="new-password" class="ios-input" />
         </div>
 
@@ -94,8 +94,8 @@ const googleLoginUrl = `${apiBaseUrl}/api/v1/auth/google/login`;
         <p id="register-success" class="alert hidden"></p>
         <button type="submit" class="btn-primary">Crear cuenta</button>
         <p class="auth-switch">
-          Ya tienes cuenta?
-          <button id="go-login" type="button" class="auth-switch-link">Iniciar sesion</button>
+          ¿Ya tienes cuenta?
+          <button id="go-login" type="button" class="auth-switch-link">Iniciar sesión</button>
         </p>
       </form>
     </section>

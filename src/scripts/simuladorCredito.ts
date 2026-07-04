@@ -372,7 +372,7 @@ export default function initSimuladorCredito(): void {
   const syncBalloonConstraints = (normalizeValue: boolean) => {
     const balloonMax = getBalloonMax();
     cuotaFinalBalloonEl.max = String(balloonMax);
-    cuotaFinalBalloonHelpEl.textContent = `Maximo permitido: S/ ${formatPenAmount(balloonMax)}`;
+    cuotaFinalBalloonHelpEl.textContent = `Máximo permitido: S/ ${formatPenAmount(balloonMax)}`;
 
     if (normalizeValue && toNumber(cuotaFinalBalloonEl) > balloonMax) {
       cuotaFinalBalloonEl.value = String(balloonMax);
@@ -498,7 +498,7 @@ export default function initSimuladorCredito(): void {
       if (toNumber(tasaAnualEl) > 100) return 'La tasa anual debe estar entre 0 y 100.';
       if (tipoTasaEl.value === 'nominal') {
         const frecuenciaCapitalizacion = Math.trunc(toNumber(frecuenciaCapitalizacionEl));
-        if (frecuenciaCapitalizacion <= 0) return 'La frecuencia de capitalizacion debe ser mayor a 0.';
+        if (frecuenciaCapitalizacion <= 0) return 'La frecuencia de capitalización debe ser mayor a 0.';
       }
       const seguroDesgravamen = toNumber(seguroDesgravamenAnualEl);
       if (!Number.isFinite(seguroDesgravamen)) return 'Ingresa un seguro de desgravamen anual valido.';
@@ -510,7 +510,7 @@ export default function initSimuladorCredito(): void {
       }
 
       if (precioVehiculo < bank.montoMin) {
-        return `El precio del vehiculo para ${bank.nombre} debe ser al menos ${bank.montoMin} ${bank.moneda}.`;
+        return `El precio del vehículo para ${bank.nombre} debe ser al menos ${bank.montoMin} ${bank.moneda}.`;
       }
 
       if (cuotaInicial < bank.porcentajeCuotaInicialMin || cuotaInicial > bank.porcentajeCuotaInicialMax) {
@@ -518,7 +518,7 @@ export default function initSimuladorCredito(): void {
       }
 
       if (periodosGracia > bank.periodosGraciaMax) {
-        return `El numero de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
+        return `El número de períodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
       }
 
       if (!bank.plazosMeses.includes(Number(plazoMesesEl.value))) {
@@ -695,7 +695,7 @@ export default function initSimuladorCredito(): void {
       if (!hasResumen && !hasCronograma) {
         setMessage(
           errorEl,
-          'La API respondio sin datos de simulacion. Verifica que /api/v1/simulaciones devuelva result.resumen y result.cronograma.',
+          'La API respondió sin datos de simulación. Verifica que /api/v1/simulaciones devuelva result.resumen y result.cronograma.',
           false
         );
         return;

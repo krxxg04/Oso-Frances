@@ -5,8 +5,8 @@
   <header class="section-header">
     <div>
       <p class="eyebrow">Simulador</p>
-      <h2 class="section-title">Credito vehicular</h2>
-      <p class="section-subtitle">Entradas, calculo y salida completa</p>
+      <h2 class="section-title">Crédito vehicular</h2>
+      <p class="section-subtitle">Entradas, cálculo y salida completa</p>
     </div>
     <span class="chip">TCEA · VAN · TIR</span>
   </header>
@@ -18,16 +18,16 @@
     <section class="card">
       <div class="card-header">
         <div>
-          <h3 class="card-title">Vehiculo</h3>
+          <h3 class="card-title">Vehículo</h3>
           <p class="card-subtitle">Registrar o usar datos manuales</p>
         </div>
       </div>
 
       <div class="form-grid">
         <div class="field">
-          <label for="vehiculoId" class="field-label">Vehiculo guardado (opcional)</label>
+          <label for="vehiculoId" class="field-label">Vehículo guardado (opcional)</label>
           <select id="vehiculoId" name="vehiculoId" class="ios-input">
-            <option value="">No usar vehiculo guardado</option>
+            <option value="">No usar vehículo guardado</option>
           </select>
         </div>
         <div class="field">
@@ -39,7 +39,7 @@
           <input id="modelo" name="modelo" type="text" class="ios-input" />
         </div>
         <div class="field">
-          <label for="anio" class="field-label">Anio</label>
+          <label for="anio" class="field-label">Año</label>
           <input id="anio" name="anio" type="number" min="2000" step="1" class="ios-input" />
         </div>
         <div class="field">
@@ -47,21 +47,21 @@
           <input id="tipo" name="tipo" type="text" class="ios-input" value="sedan" />
         </div>
         <div class="field">
-          <label for="precioVehiculo" class="field-label">Precio del vehiculo</label>
+          <label for="precioVehiculo" class="field-label">Precio del vehículo</label>
           <input id="precioVehiculo" name="precioVehiculo" type="number" min="2000" max="500000" step="0.01" class="ios-input" required />
           <p id="precioVehiculo-error" class="field-error hidden"></p>
         </div>
       </div>
 
       <div class="card-footer">
-        <button type="button" id="btn-registrar-vehiculo" class="btn-primary">Registrar vehiculo</button>
+        <button type="button" id="btn-registrar-vehiculo" class="btn-primary">Registrar vehículo</button>
       </div>
     </section>
 
     <section class="card">
       <div class="card-header">
         <div>
-          <h3 class="card-title">Credito</h3>
+          <h3 class="card-title">Crédito</h3>
           <p class="card-subtitle">Banco, tasa, seguros y condiciones</p>
         </div>
       </div>
@@ -96,7 +96,7 @@
         </div>
 
         <div class="field">
-          <label for="tipoGracia" class="field-label">Periodo de gracia</label>
+          <label for="tipoGracia" class="field-label">Período de gracia</label>
           <select id="tipoGracia" name="tipoGracia" class="ios-input" required>
             <option value="sin_gracia">Sin gracia</option>
             <option value="parcial">Gracia parcial</option>
@@ -105,7 +105,7 @@
         </div>
 
         <div class="field">
-          <label for="periodosGracia" class="field-label">Numero de periodos de gracia</label>
+          <label for="periodosGracia" class="field-label">Número de períodos de gracia</label>
           <input id="periodosGracia" name="periodosGracia" type="number" min="0" max="6" step="1" class="ios-input" value="0" required />
           <p id="periodosGracia-error" class="field-error hidden"></p>
         </div>
@@ -113,7 +113,7 @@
         <div class="field">
           <label for="cuotaFinalBalloon" class="field-label">Cuota final balloon</label>
           <input id="cuotaFinalBalloon" name="cuotaFinalBalloon" type="number" min="0" max="0" step="0.01" class="ios-input" value="0" required />
-          <p id="cuotaFinalBalloon-help" class="field-help">Maximo permitido: S/ 0</p>
+          <p id="cuotaFinalBalloon-help" class="field-help">Máximo permitido: S/ 0</p>
           <p id="cuotaFinalBalloon-error" class="field-error hidden"></p>
         </div>
 
@@ -146,7 +146,7 @@
           <input id="tasaAnual" name="tasaAnual" type="number" min="0" max="100" step="0.0001" class="ios-input" />
         </div>
         <div class="field hidden" id="frecuencia-capitalizacion-field">
-          <label for="frecuenciaCapitalizacion" class="field-label">Frecuencia de capitalizacion</label>
+          <label for="frecuenciaCapitalizacion" class="field-label">Frecuencia de capitalización</label>
           <input
             id="frecuenciaCapitalizacion"
             name="frecuenciaCapitalizacion"
@@ -164,7 +164,7 @@
       </div>
 
       <div class="card-footer">
-        <button type="submit" id="btn-calcular" class="btn-primary">Simular credito</button>
+        <button type="submit" id="btn-calcular" class="btn-primary">Simular crédito</button>
       </div>
     </section>
   </form>
@@ -201,12 +201,12 @@
               <th>Fecha</th>
               <th>Saldo Inicial</th>
               <th>Cuota</th>
-              <th>Capital + Interes</th>
-              <th>Interes</th>
+              <th>Capital + Interés</th>
+              <th>Interés</th>
               <th>Seguro Vehicular</th>
               <th>Seguro Desgravamen</th>
               <th>Seguro</th>
-              <th>Amortizacion</th>
+              <th>Amortización</th>
               <th>Saldo Final</th>
               <th>Tipo Gracia</th>
             </tr>
@@ -232,9 +232,9 @@
         <option value="24">24</option>
         <option value="36">36</option>
       </select>
-      <input id="f-vehiculo" class="ios-input" placeholder="Vehiculo" />
-      <input id="f-monto-min" class="ios-input" type="number" placeholder="Monto minimo" />
-      <input id="f-monto-max" class="ios-input" type="number" placeholder="Monto maximo" />
+      <input id="f-vehiculo" class="ios-input" placeholder="Vehículo" />
+      <input id="f-monto-min" class="ios-input" type="number" placeholder="Monto mínimo" />
+      <input id="f-monto-max" class="ios-input" type="number" placeholder="Monto máximo" />
       <input id="f-fecha-desde" class="ios-input" type="date" />
       <input id="f-fecha-hasta" class="ios-input" type="date" />
       <button class="btn-primary" type="submit">Filtrar historial</button>
@@ -248,7 +248,7 @@
             <th>Banco</th>
             <th>TCEA</th>
             <th>Total Pagado</th>
-            <th>Accion</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody id="historial-body"></tbody>

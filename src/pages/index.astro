@@ -3,15 +3,15 @@ import Layout from '../layouts/Layout.astro';
 import SimuladorCredito from '../components/SimuladorCredito.astro';
 ---
 
-<Layout title="Credito Vehicular">
+<Layout title="Crédito Vehicular">
   <div id="app-loading" class="auth-loading-card">
-    <p class="auth-loading-title">Verificando sesion...</p>
+    <p class="auth-loading-title">Verificando sesión...</p>
     <p class="auth-loading-text">Estamos validando tus credenciales con el backend.</p>
   </div>
   <div id="app-auth-error" class="auth-loading-card hidden">
-    <p class="auth-loading-title">No se pudo validar la sesion</p>
+    <p class="auth-loading-title">No se pudo validar la sesión</p>
     <p id="app-auth-error-text" class="auth-loading-text">
-      Revisa la conexion con el backend, CORS y la cookie de sesion.
+      Revisa la conexión con el backend, CORS y la cookie de sesión.
     </p>
     <div class="auth-loading-actions">
       <a href="/login" class="btn-primary">Ir al login</a>
