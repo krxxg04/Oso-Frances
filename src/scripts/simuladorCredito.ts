@@ -45,6 +45,16 @@ const setMessage = (el: HTMLElement, message: string, hidden: boolean) => {
 };
 
 const MANUAL_BANK_ID = 'manual';
+const MIN_PRECIO_VEHICULO = 2000;
+const MAX_PRECIO_VEHICULO = 500000;
+const MAX_SEGURO_VEHICULAR_MENSUAL = 5000;
+const MAX_PERIODOS_GRACIA = 6;
+
+const formatPenAmount = (value: number): string =>
+  new Intl.NumberFormat('es-PE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(Number.isFinite(value) ? value : 0);
 
 export default function initSimuladorCredito(): void {
   const form = getRequiredEl<HTMLFormElement>('simulador-form');
@@ -69,6 +79,11 @@ export default function initSimuladorCredito(): void {
   const cuotaFinalBalloonEl = getRequiredEl<HTMLInputElement>('cuotaFinalBalloon');
   const seguroVehicularMensualEl = getRequiredEl<HTMLInputElement>('seguroVehicularMensual');
   const fechaInicioEl = getRequiredEl<HTMLInputElement>('fechaInicio');
+  const precioVehiculoErrorEl = getRequiredEl<HTMLParagraphElement>('precioVehiculo-error');
+  const periodosGraciaErrorEl = getRequiredEl<HTMLParagraphElement>('periodosGracia-error');
+  const cuotaFinalBalloonHelpEl = getRequiredEl<HTMLParagraphElement>('cuotaFinalBalloon-help');
+  const cuotaFinalBalloonErrorEl = getRequiredEl<HTMLParagraphElement>('cuotaFinalBalloon-error');
+  const seguroVehicularMensualErrorEl = getRequiredEl<HTMLParagraphElement>('seguroVehicularMensual-error');
 
   const bancoInfoWrapEl = getRequiredEl<HTMLDivElement>('banco-info');
   const bancoInfoTextEl = getRequiredEl<HTMLParagraphElement>('banco-info-text');
@@ -156,7 +171,7 @@ export default function initSimuladorCredito(): void {
     if (!bank) {
       porcentajeCuotaInicialEl.min = '0';
       porcentajeCuotaInicialEl.max = '100';
-      periodosGraciaEl.max = '120';
+      periodosGraciaEl.max = String(MAX_PERIODOS_GRACIA);
       renderPlazos([24, 36]);
       return;
     }
@@ -170,9 +185,10 @@ export default function initSimuladorCredito(): void {
       porcentajeCuotaInicialEl.value = String(bank.porcentajeCuotaInicialMax);
     }
 
-    periodosGraciaEl.max = String(bank.periodosGraciaMax);
-    if (Number(periodosGraciaEl.value) > bank.periodosGraciaMax) {
-      periodosGraciaEl.value = String(bank.periodosGraciaMax);
+    const periodosGraciaMax = Math.min(bank.periodosGraciaMax, MAX_PERIODOS_GRACIA);
+    periodosGraciaEl.max = String(periodosGraciaMax);
+    if (Number(periodosGraciaEl.value) > periodosGraciaMax) {
+      periodosGraciaEl.value = String(periodosGraciaMax);
     }
 
     const plazosBanco = bank.plazosMeses || [];
@@ -340,15 +356,138 @@ export default function initSimuladorCredito(): void {
     moneda: monedaEl.value,
   });
 
+  const setFieldError = (
+    input: HTMLInputElement,
+    errorEl: HTMLParagraphElement,
+    message: string | null
+  ) => {
+    input.setCustomValidity(message ?? '');
+    input.classList.toggle('is-invalid', !!message);
+    input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    setMessage(errorEl, message ?? '', !message);
+  };
+
+  const getBalloonMax = (): number => Math.max(0, toNumber(precioVehiculoEl) * 0.5);
+
+  const syncBalloonConstraints = (normalizeValue: boolean) => {
+    const balloonMax = getBalloonMax();
+    cuotaFinalBalloonEl.max = String(balloonMax);
+    cuotaFinalBalloonHelpEl.textContent = `Maximo permitido: S/ ${formatPenAmount(balloonMax)}`;
+
+    if (normalizeValue && toNumber(cuotaFinalBalloonEl) > balloonMax) {
+      cuotaFinalBalloonEl.value = String(balloonMax);
+    }
+  };
+
+  const syncTipoGraciaState = () => {
+    if (tipoGraciaEl.value === 'sin_gracia') {
+      periodosGraciaEl.value = '0';
+      periodosGraciaEl.disabled = true;
+      periodosGraciaEl.readOnly = true;
+      return;
+    }
+
+    periodosGraciaEl.disabled = false;
+    periodosGraciaEl.readOnly = false;
+    if (Number(periodosGraciaEl.value) <= 0) periodosGraciaEl.value = '1';
+  };
+
+  const validateControlledFields = (): string | null => {
+    let firstError: string | null = null;
+
+    const precioVehiculo = toNumber(precioVehiculoEl);
+    const precioVehiculoError =
+      precioVehiculo < MIN_PRECIO_VEHICULO || precioVehiculo > MAX_PRECIO_VEHICULO
+        ? 'El precio del vehículo debe estar entre S/ 2,000 y S/ 500,000'
+        : null;
+    setFieldError(precioVehiculoEl, precioVehiculoErrorEl, precioVehiculoError);
+    if (!firstError && precioVehiculoError) firstError = precioVehiculoError;
+
+    const balloonMax = getBalloonMax();
+    const cuotaFinalBalloon = toNumber(cuotaFinalBalloonEl);
+    const cuotaFinalBalloonError =
+      cuotaFinalBalloon < 0 || cuotaFinalBalloon > balloonMax
+        ? 'La cuota final balloon no puede superar el 50% del precio del vehículo'
+        : null;
+    setFieldError(cuotaFinalBalloonEl, cuotaFinalBalloonErrorEl, cuotaFinalBalloonError);
+    if (!firstError && cuotaFinalBalloonError) firstError = cuotaFinalBalloonError;
+
+    const seguroVehicularMensual = toNumber(seguroVehicularMensualEl);
+    const seguroVehicularMensualError =
+      seguroVehicularMensual < 0 || seguroVehicularMensual > MAX_SEGURO_VEHICULAR_MENSUAL
+        ? 'El seguro vehicular mensual debe estar entre S/ 0 y S/ 5,000'
+        : null;
+    setFieldError(seguroVehicularMensualEl, seguroVehicularMensualErrorEl, seguroVehicularMensualError);
+    if (!firstError && seguroVehicularMensualError) firstError = seguroVehicularMensualError;
+
+    const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
+    let periodosGraciaError: string | null = null;
+    if (periodosGracia < 0 || periodosGracia > MAX_PERIODOS_GRACIA) {
+      periodosGraciaError = 'Los períodos de gracia no pueden superar 6';
+    } else if (tipoGraciaEl.value === 'sin_gracia' && periodosGracia !== 0) {
+      periodosGraciaError = 'Los períodos de gracia deben ser 0 cuando no hay gracia';
+    } else if (
+      (tipoGraciaEl.value === 'parcial' || tipoGraciaEl.value === 'total') &&
+      periodosGracia < 1
+    ) {
+      periodosGraciaError = 'Debes ingresar al menos 1 período de gracia para gracia parcial o total';
+    }
+    setFieldError(periodosGraciaEl, periodosGraciaErrorEl, periodosGraciaError);
+    if (!firstError && periodosGraciaError) firstError = periodosGraciaError;
+
+    return firstError;
+  };
+
+  const updateCalculateButtonState = () => {
+    btnCalcularEl.disabled = !!validateSimulationInputs();
+  };
+
+  const refreshFrontendValidation = (showGlobalError = false) => {
+    syncBalloonConstraints(true);
+    const firstError = validateControlledFields();
+    const fullValidationError = validateSimulationInputs();
+
+    if (showGlobalError) {
+      setMessage(errorEl, fullValidationError ?? '', !fullValidationError);
+      if (!fullValidationError) setMessage(okEl, '', true);
+    } else if (!fullValidationError || fullValidationError === firstError) {
+      setMessage(errorEl, '', true);
+    }
+
+    updateCalculateButtonState();
+    return fullValidationError;
+  };
+
   const validateSimulationInputs = (): string | null => {
     const cuotaInicial = toNumber(porcentajeCuotaInicialEl);
+    const precioVehiculo = toNumber(precioVehiculoEl);
+    const seguroVehicularMensual = toNumber(seguroVehicularMensualEl);
+    const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
+    const cuotaFinalBalloon = toNumber(cuotaFinalBalloonEl);
+
+    if (precioVehiculo < MIN_PRECIO_VEHICULO || precioVehiculo > MAX_PRECIO_VEHICULO) {
+      return 'El precio del vehículo debe estar entre S/ 2,000 y S/ 500,000';
+    }
+    if (cuotaFinalBalloon < 0 || cuotaFinalBalloon > getBalloonMax()) {
+      return 'La cuota final balloon no puede superar el 50% del precio del vehículo';
+    }
+    if (seguroVehicularMensual < 0 || seguroVehicularMensual > MAX_SEGURO_VEHICULAR_MENSUAL) {
+      return 'El seguro vehicular mensual debe estar entre S/ 0 y S/ 5,000';
+    }
+    if (periodosGracia < 0 || periodosGracia > MAX_PERIODOS_GRACIA) {
+      return 'Los períodos de gracia no pueden superar 6';
+    }
+    if (tipoGraciaEl.value === 'sin_gracia' && periodosGracia !== 0) {
+      return 'Los períodos de gracia deben ser 0 cuando no hay gracia';
+    }
+    if ((tipoGraciaEl.value === 'parcial' || tipoGraciaEl.value === 'total') && periodosGracia < 1) {
+      return 'Debes ingresar al menos 1 período de gracia para gracia parcial o total';
+    }
 
     if (!marcaEl.value.trim()) return 'Ingresa la marca del vehículo.';
     if (!modeloEl.value.trim()) return 'Ingresa el modelo del vehículo.';
     if (!Number.isFinite(toNumber(anioEl)) || toNumber(anioEl) < 2000) return 'Ingresa un año válido (>= 2000).';
     if (!tipoEl.value.trim()) return 'Ingresa el tipo de vehículo.';
-    if (!Number.isFinite(toNumber(precioVehiculoEl)) || toNumber(precioVehiculoEl) < 2000)
-      return 'Ingresa un precio de vehiculo mayor o igual a 2000.';
     if (!Number.isFinite(cuotaInicial) || cuotaInicial < 0)
       return 'Ingresa una cuota inicial válida.';
     if (cuotaInicial > 100) return 'La cuota inicial debe estar entre 0% y 100%.';
@@ -370,7 +509,7 @@ export default function initSimuladorCredito(): void {
         return `La moneda para ${bank.nombre} debe ser ${bank.moneda}.`;
       }
 
-      if (toNumber(precioVehiculoEl) < bank.montoMin) {
+      if (precioVehiculo < bank.montoMin) {
         return `El precio del vehiculo para ${bank.nombre} debe ser al menos ${bank.montoMin} ${bank.moneda}.`;
       }
 
@@ -378,7 +517,6 @@ export default function initSimuladorCredito(): void {
         return `La cuota inicial para ${bank.nombre} debe estar entre ${bank.porcentajeCuotaInicialMin}% y ${bank.porcentajeCuotaInicialMax}%.`;
       }
 
-      const periodosGracia = Math.trunc(toNumber(periodosGraciaEl));
       if (periodosGracia > bank.periodosGraciaMax) {
         return `El numero de periodos de gracia para ${bank.nombre} no puede superar ${bank.periodosGraciaMax}.`;
       }
@@ -426,19 +564,17 @@ export default function initSimuladorCredito(): void {
     applyBankConstraints(bank);
     updateManualRateVisibility();
     updateCapitalizacionVisibility();
+    refreshFrontendValidation(true);
   });
 
-  tipoTasaEl.addEventListener('change', updateCapitalizacionVisibility);
+  tipoTasaEl.addEventListener('change', () => {
+    updateCapitalizacionVisibility();
+    refreshFrontendValidation();
+  });
 
   tipoGraciaEl.addEventListener('change', () => {
-    if (tipoGraciaEl.value === 'sin_gracia') {
-      periodosGraciaEl.value = '0';
-      periodosGraciaEl.readOnly = true;
-      return;
-    }
-
-    periodosGraciaEl.readOnly = false;
-    if (Number(periodosGraciaEl.value) <= 0) periodosGraciaEl.value = '1';
+    syncTipoGraciaState();
+    refreshFrontendValidation(true);
   });
 
   vehiculoIdEl.addEventListener('change', () => {
@@ -450,6 +586,37 @@ export default function initSimuladorCredito(): void {
     tipoEl.value = vehiculo.tipo;
     precioVehiculoEl.value = String(vehiculo.precio);
     monedaEl.value = vehiculo.moneda;
+    refreshFrontendValidation(true);
+  });
+
+  [precioVehiculoEl, cuotaFinalBalloonEl, seguroVehicularMensualEl, periodosGraciaEl].forEach((input) => {
+    input.addEventListener('input', () => {
+      if (input === precioVehiculoEl) syncBalloonConstraints(true);
+      refreshFrontendValidation();
+    });
+    input.addEventListener('blur', () => {
+      if (input === precioVehiculoEl) syncBalloonConstraints(true);
+      refreshFrontendValidation(true);
+    });
+  });
+
+  [
+    marcaEl,
+    modeloEl,
+    anioEl,
+    tipoEl,
+    monedaEl,
+    bancoIdEl,
+    porcentajeCuotaInicialEl,
+    plazoMesesEl,
+    fechaInicioEl,
+    tasaAnualEl,
+    frecuenciaCapitalizacionEl,
+    seguroDesgravamenAnualEl,
+  ].forEach((input) => {
+    input.addEventListener('input', () => refreshFrontendValidation());
+    input.addEventListener('change', () => refreshFrontendValidation());
+    input.addEventListener('blur', () => refreshFrontendValidation(true));
   });
 
   btnRegistrarVehiculoEl.addEventListener('click', async () => {
@@ -468,7 +635,7 @@ export default function initSimuladorCredito(): void {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const validationError = validateSimulationInputs();
+    const validationError = refreshFrontendValidation(true);
     if (validationError) {
       setMessage(errorEl, validationError, false);
       setMessage(okEl, '', true);
@@ -480,16 +647,6 @@ export default function initSimuladorCredito(): void {
 
     const tipoGracia = tipoGraciaEl.value as TipoGracia;
     const periodosGracia = Math.max(0, Math.trunc(toNumber(periodosGraciaEl)));
-
-    if (tipoGracia === 'sin_gracia' && periodosGracia !== 0) {
-      setMessage(errorEl, 'Si el tipo de gracia es sin_gracia, periodosGracia debe ser 0.', false);
-      return;
-    }
-
-    if ((tipoGracia === 'parcial' || tipoGracia === 'total') && periodosGracia <= 0) {
-      setMessage(errorEl, 'Si el tipo de gracia es parcial o total, periodosGracia debe ser mayor a 0.', false);
-      return;
-    }
 
     btnCalcularEl.disabled = true;
     btnCalcularEl.textContent = 'Simulando...';
@@ -548,7 +705,7 @@ export default function initSimuladorCredito(): void {
     } catch (error) {
       setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo generar la simulación.', false);
     } finally {
-      btnCalcularEl.disabled = false;
+      updateCalculateButtonState();
       btnCalcularEl.textContent = 'Simular crédito';
     }
   });
@@ -599,7 +756,9 @@ export default function initSimuladorCredito(): void {
       updateManualRateVisibility();
       updateCapitalizacionVisibility();
       applyBankConstraints(null);
-      tipoGraciaEl.dispatchEvent(new Event('change'));
+      syncBalloonConstraints(false);
+      syncTipoGraciaState();
+      refreshFrontendValidation();
     } catch (error) {
       setMessage(errorEl, error instanceof Error ? error.message : 'No se pudo inicializar el simulador.', false);
     }

@@ -318,6 +318,16 @@ body::-webkit-scrollbar-thumb {
 	box-shadow: none;
 }
 
+.ios-input.is-invalid {
+	border-color: #ff6b6b;
+}
+
+.ios-input:disabled,
+.ios-input[readonly] {
+	opacity: 0.65;
+	cursor: not-allowed;
+}
+
 .btn-primary {
 	width: 100%;
 	border: 1px solid #3a3a3c;
@@ -505,6 +515,18 @@ body::-webkit-scrollbar-thumb {
 	color: #f2f2f7;
 	font-size: 0.85rem;
 	border: 1px solid #3a3a3c;
+}
+
+.field-help {
+	margin: -2px 0 0;
+	font-size: 0.78rem;
+	color: var(--plomo-2);
+}
+
+.field-error {
+	margin: -2px 0 0;
+	font-size: 0.78rem;
+	color: #ff8f8f;
 }
 
 .helper {
