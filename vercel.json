@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://backend-oso-frances.onrender.com/api/:path*" },
+    { "source": "/health", "destination": "https://backend-oso-frances.onrender.com/health" }
+  ]
+}
